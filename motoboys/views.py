@@ -55,6 +55,7 @@ def motoboy_login(request):
             password = data.get('password')
             remember_me = data.get('remember_me', False)
             device_id = data.get('device_id')  # Novo campo
+            print(f"Login attempt - Email: {email}, Device ID: {device_id}")
             
             if not email or not password:
                 return JsonResponse({
