@@ -777,9 +777,9 @@
             submitButton.disabled = true;
             
             // Collect form data
-            const formData = new FormData(event.target);
-            const registrationData = {
-                email: formData.get('email'),
+                const formData = new FormData(event.target);
+                const registrationData = {
+                    email: formData.get('email'),
                 password: formData.get('password'),
                 full_name: formData.get('fullName'),
                 phone_number: formData.get('phone'),
@@ -809,9 +809,9 @@
                     showNotification(data.message, 'success');
                     
                     // Redirect to dashboard after success
-                    setTimeout(() => {
+                setTimeout(() => {
                         window.location.href = '/motoboys/dashboard/';
-                    }, 2000);
+                }, 2000);
                 } else {
                     showNotification(data.message, 'error');
                     submitButton.innerHTML = '<i class="fas fa-arrow-right mr-2"></i>Criar Conta';
