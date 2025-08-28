@@ -12,3 +12,5 @@ services:
         value: delivery_system.settings
       - key: DEBUG
         value: false
+      - key: PORT
+        value: 8000
