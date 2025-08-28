@@ -217,43 +217,13 @@ def check_existing_device_registration(device_id, request):
     except Exception as e:
         print(f"Erro ao buscar por device_id: {e}")
     
-    # 2. Verifica por IP (últimos 30 dias)
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
-    else:
-        ip = request.META.get('REMOTE_ADDR', '')
-    
-    if ip:
-        try:
-            # Busca por motoboys que acessaram recentemente deste IP
-            from django.utils import timezone
-            from datetime import timedelta
-            
-            recent_date = timezone.now() - timedelta(days=30)
-            
-            # Verifica se há algum motoboy criado recentemente deste IP
-            # (assumindo que o IP não mudou muito)
-            motoboy = Motoboy.objects.filter(
-                created_at__gte=recent_date
-            ).first()
-            
-            if motoboy:
-                print(f"Encontrou motoboy por IP recente: {motoboy.full_name}")
-                return motoboy
-        except Exception as e:
-            print(f"Erro ao buscar por IP: {e}")
-    
-    # 3. Verifica se há algum motoboy cadastrado (fallback)
-    # Se já existe pelo menos um motoboy, provavelmente este dispositivo já foi usado
+    # 2. Verifica se há algum motoboy com device_ids vazio (não foi atualizado ainda)
+    # Isso é um fallback para motoboys antigos
     try:
-        motoboy_count = Motoboy.objects.count()
-        if motoboy_count > 0:
-            # Verifica se há algum motoboy com device_ids vazio (não foi atualizado ainda)
-            motoboy = Motoboy.objects.filter(device_ids__isnull=True).first()
-            if motoboy:
-                print(f"Encontrou motoboy existente sem device_ids: {motoboy.full_name}")
-                return motoboy
+        motoboy = Motoboy.objects.filter(device_ids__isnull=True).first()
+        if motoboy:
+            print(f"Encontrou motoboy existente sem device_ids: {motoboy.full_name}")
+            return motoboy
     except Exception as e:
         print(f"Erro ao verificar motoboys existentes: {e}")
     
