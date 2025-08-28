@@ -156,3 +156,7 @@ CORS_ALLOW_ALL_ORIGINS = True  # Apenas para desenvolvimento
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/admin_dashboard/'
 LOGOUT_REDIRECT_URL = '/login/'
+
+# Render specific settings
+import os
+PORT = int(os.environ.get('PORT', 8000))
