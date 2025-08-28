@@ -78,6 +78,10 @@ def motoboy_login(request):
                                 current_device_ids.append(device_id)
                                 motoboy.device_ids = current_device_ids
                                 motoboy.save()
+                                print(f"Device ID {device_id} salvo para motoboy {motoboy.full_name}")
+                                print(f"Device IDs atuais: {motoboy.device_ids}")
+                            else:
+                                print(f"Device ID {device_id} já existe para motoboy {motoboy.full_name}")
                         except Exception as e:
                             print(f"Erro ao salvar device_id: {e}")
                             pass
@@ -208,12 +212,17 @@ def generate_device_id(request):
 def check_existing_device_registration(device_id, request):
     """Verifica se já existe um cadastro para este dispositivo"""
     
+    print(f"Verificando device_id: {device_id}")
+    
     # 1. Verifica se já existe um motoboy com este device_id
     try:
         motoboy = Motoboy.objects.filter(device_ids__contains=device_id).first()
         if motoboy:
             print(f"Encontrou motoboy por device_id: {motoboy.full_name}")
+            print(f"Device IDs do motoboy: {motoboy.device_ids}")
             return motoboy
+        else:
+            print(f"Nenhum motoboy encontrado com device_id: {device_id}")
     except Exception as e:
         print(f"Erro ao buscar por device_id: {e}")
     
