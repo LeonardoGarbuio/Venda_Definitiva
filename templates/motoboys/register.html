@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cadastro Motoboy - MotoDelivery</title>
+    <link rel="stylesheet" href="/static/css/main.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+<script type="module" src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Fmotodelive8457back.builtwithrocket.new&_be=https%3A%2F%2Fapplication.rocket.new&_v=0.1.8"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50">
+    <!-- Header -->
+    <header class="bg-white shadow-subtle border-b border-gray-100 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Back Button & Logo -->
+                <div class="flex items-center space-x-3">
+                    <button onclick="goBack()" class="lg:hidden text-text-secondary hover:text-primary transition-colors duration-200 p-2">
+                        <i class="fas fa-arrow-left text-xl"></i>
+                    </button>
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-primary text-white p-2 rounded-lg">
+                            <i class="fas fa-motorcycle text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-heading font-bold text-secondary">MotoDelivery</h1>
+                            <p class="text-xs text-text-secondary">Cadastro de Motoboy</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Navigation Links -->
+                <nav class="hidden md:flex items-center space-x-6" id="motoboyNav">
+                    <!-- Links serão preenchidos dinamicamente -->
+                </nav>
+
+                <!-- Mobile Menu Button -->
+                <button class="md:hidden text-text-secondary hover:text-primary" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div id="mobileMenu" class="md:hidden hidden bg-white border-t border-gray-100">
+            <div class="px-4 py-3 space-y-3">
+                <div id="motoboyMobileNav">
+                    <!-- Links serão preenchidos dinamicamente -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Progress Indicator -->
+    <div class="bg-white border-b border-gray-100">
+        <div class="max-w-4xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-semibold text-secondary">Progresso do Cadastro</span>
+                <span id="progressText" class="text-sm text-text-secondary">Etapa 1 de 4</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div id="progressBar" class="bg-primary h-2 rounded-full transition-all duration-300" style="width: 25%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 py-6 px-4">
+        <div class="max-w-4xl mx-auto">
+            <!-- Registration Form -->
+            <div class="card-elevated p-6 lg:p-8">
+                <!-- Form Header -->
+                <div class="text-center mb-8">
+                    <div class="bg-primary-100 text-primary p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-motorcycle text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl lg:text-3xl font-heading font-bold text-secondary mb-2">Cadastro de Motoboy</h2>
+                    <p class="text-text-secondary">Junte-se à nossa rede de entregadores e comece a ganhar dinheiro hoje mesmo</p>
+                </div>
+
+                <!-- Multi-Step Form -->
+                <form id="registrationForm" class="space-y-8" onsubmit="handleRegistration(event)">
+                    <!-- Hidden field para device_id -->
+                    <input type="hidden" id="deviceIdField" name="device_id" />
+                    <!-- Step 1: Personal Information -->
+                    <div id="step1" class="step-content">
+                        <div class="mb-6">
+                            <h3 class="text-xl font-heading font-semibold text-secondary mb-2">
+                                <i class="fas fa-user mr-2 text-primary"></i>Informações Pessoais
+                            </h3>
+                            <p class="text-text-secondary text-sm">Preencha seus dados pessoais</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Full Name -->
+                            <div>
+                                <label for="fullName" class="block text-sm font-semibold text-secondary mb-2">
+                                    Nome Completo *
+                                </label>
+                                <input type="text" id="fullName" name="fullName" class="form-input" placeholder="João Silva Santos" required oninput="validateName(this)" />
+                                <div id="nameError" class="text-error text-sm mt-1 hidden">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    <span>Nome deve ter pelo menos 2 palavras</span>
+                                </div>
+                            </div>
+
+                            <!-- CPF -->
+                            <div>
+                                <label for="cpf" class="block text-sm font-semibold text-secondary mb-2">
+                                    CPF *
+                                </label>
+                                <input type="text" id="cpf" name="cpf" class="form-input" placeholder="000.000.000-00" required maxlength="14" oninput="formatCPF(this)" />
+                                <div id="cpfError" class="text-error text-sm mt-1 hidden">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    <span>CPF inválido</span>
+                                </div>
+                            </div>
+
+                            <!-- Phone -->
+                            <div>
+                                <label for="phone" class="block text-sm font-semibold text-secondary mb-2">
+                                    Telefone/WhatsApp *
+                                </label>
+                                <input type="tel" id="phone" name="phone" class="form-input" placeholder="(11) 99999-9999" required maxlength="15" oninput="formatPhone(this)" />
+                                <div id="phoneError" class="text-error text-sm mt-1 hidden">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    <span>Telefone inválido</span>
+                                </div>
+                            </div>
+
+                            <!-- Document Type -->
+                            <div>
+                                <label for="documentType" class="block text-sm font-semibold text-secondary mb-2">
+                                    Tipo de Documento *
+                                </label>
+                                <select id="documentType" name="documentType" class="form-input" required>
+                                    <option value>Selecione o tipo</option>
+                                    <option value="CPF">CPF</option>
+                                    <option value="CNH">CNH</option>
+                                    <option value="RG">RG</option>
+                                </select>
+                            </div>
+
+                            <!-- Document Number -->
+                            <div>
+                                <label for="documentNumber" class="block text-sm font-semibold text-secondary mb-2">
+                                    Número do Documento *
+                                </label>
+                                <input type="text" id="documentNumber" name="documentNumber" class="form-input" placeholder="123.456.789-00" required />
+                            </div>
+
+                            <!-- Email -->
+                            <div>
+                                <label for="email" class="block text-sm font-semibold text-secondary mb-2">
+                                    Email *
+                                </label>
+                                <input type="email" id="email" name="email" class="form-input" placeholder="joao@email.com" required oninput="validateEmail(this)" onblur="checkMotoboyStatus(this.value)" />
+                                <div id="emailError" class="text-error text-sm mt-1 hidden">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    <span>Email inválido</span>
+                                </div>
+                                <div id="emailStatus" class="text-sm mt-1 hidden">
+                                    <!-- Status será preenchido dinamicamente -->
+                                </div>
+                            </div>
+
+                            <!-- Password -->
+                            <div>
+                                <label for="password" class="block text-sm font-semibold text-secondary mb-2">
+                                    Senha *
+                                </label>
+                                <div class="relative">
+                                    <input type="password" id="password" name="password" class="form-input pr-10" placeholder="Digite sua senha" required minlength="6" />
+                                    <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center" onclick="togglePassword()">
+                                        <i id="passwordIcon" class="fas fa-eye text-gray-400"></i>
+                                    </button>
+                                </div>
+                                <div id="passwordError" class="text-error text-sm mt-1 hidden">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    <span>A senha deve ter pelo menos 6 caracteres</span>
+                                </div>
+                            </div>
+
+                            <!-- Birth Date -->
+                            <div>
+                                <label for="birthDate" class="block text-sm font-semibold text-secondary mb-2">
+                                    Data de Nascimento *
+                                </label>
+                                <input type="date" id="birthDate" name="birthDate" class="form-input" required max="2006-08-27" oninput="validateAge(this)" />
+                                <div id="ageError" class="text-error text-sm mt-1 hidden">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    <span>Você deve ter pelo menos 18 anos</span>
+                                </div>
+                            </div>
+
+                            <!-- Address -->
+                            <div>
+                                <label for="address" class="block text-sm font-semibold text-secondary mb-2">
+                                    Endereço Completo *
+                                </label>
+                                <input type="text" id="address" name="address" class="form-input" placeholder="Rua das Flores, 123 - Centro - São Paulo/SP" required />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Vehicle Information -->
+                    <div id="step2" class="step-content hidden">
+                        <div class="mb-6">
+                            <h3 class="text-xl font-heading font-semibold text-secondary mb-2">
+                                <i class="fas fa-motorcycle mr-2 text-primary"></i>Informações do Veículo
+                            </h3>
+                            <p class="text-text-secondary text-sm">Dados da sua motocicleta</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Motorcycle Brand -->
+                            <div>
+                                <label for="bikeBrand" class="block text-sm font-semibold text-secondary mb-2">
+                                    Marca da Moto *
+                                </label>
+                                <select id="bikeBrand" name="bikeBrand" class="form-input" required>
+                                    <option value>Selecione a marca</option>
+                                    <option value="Honda">Honda</option>
+                                    <option value="Yamaha">Yamaha</option>
+                                    <option value="Suzuki">Suzuki</option>
+                                    <option value="Kawasaki">Kawasaki</option>
+                                    <option value="BMW">BMW</option>
+                                    <option value="Harley-Davidson">Harley-Davidson</option>
+                                    <option value="Outras">Outras</option>
+                                </select>
+                            </div>
+
+                            <!-- Motorcycle Model -->
+                            <div>
+                                <label for="bikeModel" class="block text-sm font-semibold text-secondary mb-2">
+                                    Modelo *
+                                </label>
+                                <input type="text" id="bikeModel" name="bikeModel" class="form-input" placeholder="CG 160 Titan" required />
+                            </div>
+
+                            <!-- License Plate -->
+                            <div>
+                                <label for="licensePlate" class="block text-sm font-semibold text-secondary mb-2">
+                                    Placa *
+                                </label>
+                                <input type="text" id="licensePlate" name="licensePlate" class="form-input" placeholder="ABC-1234" required maxlength="8" oninput="formatLicensePlate(this)" />
+                            </div>
+
+                            <!-- Year -->
+                            <div>
+                                <label for="bikeYear" class="block text-sm font-semibold text-secondary mb-2">
+                                    Ano *
+                                </label>
+                                <input type="number" id="bikeYear" name="bikeYear" class="form-input" placeholder="2020" required min="2000" max="2025" />
+                            </div>
+
+                            <!-- Color -->
+                            <div>
+                                <label for="bikeColor" class="block text-sm font-semibold text-secondary mb-2">
+                                    Cor *
+                                </label>
+                                <input type="text" id="bikeColor" name="bikeColor" class="form-input" placeholder="Vermelha" required />
+                            </div>
+
+                            <!-- Insurance -->
+                            <div>
+                                <label for="insurance" class="block text-sm font-semibold text-secondary mb-2">
+                                    Seguro
+                                </label>
+                                <select id="insurance" name="insurance" class="form-input">
+                                    <option value>Não possui</option>
+                                    <option value="Bradesco">Bradesco Seguros</option>
+                                    <option value="Porto">Porto Seguro</option>
+                                    <option value="Azul">Azul Seguros</option>
+                                    <option value="Outros">Outros</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Documentation -->
+                    <div id="step3" class="step-content hidden">
+                        <div class="mb-6">
+                            <h3 class="text-xl font-heading font-semibold text-secondary mb-2">
+                                <i class="fas fa-file-alt mr-2 text-primary"></i>Documentação
+                            </h3>
+                            <p class="text-text-secondary text-sm">Envie fotos dos seus documentos</p>
+                        </div>
+
+                        <div class="space-y-6">
+                            <!-- CNH Upload -->
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors duration-200">
+                                <div class="mb-4">
+                                    <i class="fas fa-id-card text-4xl text-gray-400 mb-2"></i>
+                                    <h4 class="text-lg font-semibold text-secondary">CNH (Carteira Nacional de Habilitação)</h4>
+                                    <p class="text-text-secondary text-sm">Categoria A obrigatória</p>
+                                </div>
+                                <input type="file" id="cnhFile" name="cnhFile" accept="image/*" class="hidden" onchange="handleFileUpload(this, 'cnhPreview')" />
+                                <button type="button" onclick="document.getElementById('cnhFile').click()" class="btn-primary mb-2">
+                                    <i class="fas fa-camera mr-2"></i>Tirar Foto / Selecionar
+                                </button>
+                                <div id="cnhPreview" class="mt-4 hidden">
+                                    <img class="w-32 h-20 object-cover rounded-lg mx-auto" alt="Preview CNH" />
+                                    <p class="text-success text-sm mt-2"><i class="fas fa-check mr-1"></i>CNH carregada</p>
+                                </div>
+                            </div>
+
+                            <!-- Vehicle Registration Upload -->
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors duration-200">
+                                <div class="mb-4">
+                                    <i class="fas fa-file-contract text-4xl text-gray-400 mb-2"></i>
+                                    <h4 class="text-lg font-semibold text-secondary">CRLV (Documento do Veículo)</h4>
+                                    <p class="text-text-secondary text-sm">Certificado de Registro e Licenciamento</p>
+                                </div>
+                                <input type="file" id="crlvFile" name="crlvFile" accept="image/*" class="hidden" onchange="handleFileUpload(this, 'crlvPreview')" />
+                                <button type="button" onclick="document.getElementById('crlvFile').click()" class="btn-primary mb-2">
+                                    <i class="fas fa-camera mr-2"></i>Tirar Foto / Selecionar
+                                </button>
+                                <div id="crlvPreview" class="mt-4 hidden">
+                                    <img class="w-32 h-20 object-cover rounded-lg mx-auto" alt="Preview CRLV" />
+                                    <p class="text-success text-sm mt-2"><i class="fas fa-check mr-1"></i>CRLV carregado</p>
+                                </div>
+                            </div>
+
+                            <!-- Profile Photo Upload -->
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors duration-200">
+                                <div class="mb-4">
+                                    <i class="fas fa-user-circle text-4xl text-gray-400 mb-2"></i>
+                                    <h4 class="text-lg font-semibold text-secondary">Foto de Perfil</h4>
+                                    <p class="text-text-secondary text-sm">Sua foto para identificação</p>
+                                </div>
+                                <input type="file" id="profileFile" name="profileFile" accept="image/*" class="hidden" onchange="handleFileUpload(this, 'profilePreview')" />
+                                <button type="button" onclick="document.getElementById('profileFile').click()" class="btn-primary mb-2">
+                                    <i class="fas fa-camera mr-2"></i>Tirar Foto / Selecionar
+                                </button>
+                                <div id="profilePreview" class="mt-4 hidden">
+                                    <img class="w-20 h-20 object-cover rounded-full mx-auto" alt="Preview Profile" />
+                                    <p class="text-success text-sm mt-2"><i class="fas fa-check mr-1"></i>Foto carregada</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Bank Information -->
+                    <div id="step4" class="step-content hidden">
+                        <div class="mb-6">
+                            <h3 class="text-xl font-heading font-semibold text-secondary mb-2">
+                                <i class="fas fa-university mr-2 text-primary"></i>Dados Bancários
+                            </h3>
+                            <p class="text-text-secondary text-sm">Para recebimento dos pagamentos</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Bank -->
+                            <div>
+                                <label for="bank" class="block text-sm font-semibold text-secondary mb-2">
+                                    Banco *
+                                </label>
+                                <select id="bank" name="bank" class="form-input" required>
+                                    <option value>Selecione o banco</option>
+                                    <option value="001">Banco do Brasil</option>
+                                    <option value="237">Bradesco</option>
+                                    <option value="104">Caixa Econômica Federal</option>
+                                    <option value="341">Itaú</option>
+                                    <option value="033">Santander</option>
+                                    <option value="260">Nu Pagamentos (Nubank)</option>
+                                    <option value="077">Banco Inter</option>
+                                    <option value="212">Banco Original</option>
+                                </select>
+                            </div>
+
+                            <!-- Agency -->
+                            <div>
+                                <label for="agency" class="block text-sm font-semibold text-secondary mb-2">
+                                    Agência *
+                                </label>
+                                <input type="text" id="agency" name="agency" class="form-input" placeholder="1234" required maxlength="6" />
+                            </div>
+
+                            <!-- Account -->
+                            <div>
+                                <label for="account" class="block text-sm font-semibold text-secondary mb-2">
+                                    Conta *
+                                </label>
+                                <input type="text" id="account" name="account" class="form-input" placeholder="12345-6" required />
+                            </div>
+
+                            <!-- Account Type -->
+                            <div>
+                                <label for="accountType" class="block text-sm font-semibold text-secondary mb-2">
+                                    Tipo de Conta *
+                                </label>
+                                <select id="accountType" name="accountType" class="form-input" required>
+                                    <option value>Selecione o tipo</option>
+                                    <option value="corrente">Conta Corrente</option>
+                                    <option value="poupanca">Conta Poupança</option>
+                                </select>
+                            </div>
+
+                            <!-- PIX Key -->
+                            <div class="lg:col-span-2">
+                                <label for="pixKey" class="block text-sm font-semibold text-secondary mb-2">
+                                    Chave PIX (Opcional)
+                                </label>
+                                <input type="text" id="pixKey" name="pixKey" class="form-input" placeholder="CPF, email, telefone ou chave aleatória" />
+                                <p class="text-text-secondary text-sm mt-1">Para recebimentos mais rápidos</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <div class="border-t border-gray-200 pt-6">
+                        <label class="flex items-start space-x-3">
+                            <input type="checkbox" id="terms" name="terms" class="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary focus:ring-2 mt-1" required />
+                            <div class="text-sm text-text-secondary">
+                                <p>Eu concordo com os 
+                                    <a href="javascript:void(0)" class="text-primary hover:text-primary-600 font-medium">Termos de Serviço</a> 
+                                    e 
+                                    <a href="javascript:void(0)" class="text-primary hover:text-primary-600 font-medium">Política de Privacidade</a> 
+                                    do MotoDelivery. Confirmo que todas as informações fornecidas são verdadeiras e que possuo todos os documentos necessários para trabalhar como entregador.
+                                </p>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Form Navigation -->
+                    <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 pt-6 border-t border-gray-200">
+                        <button type="button" id="prevButton" class="w-full sm:w-auto px-6 py-3 border border-gray-300 text-text-secondary rounded-lg font-semibold transition-all duration-200 hover:bg-gray-50 hidden" onclick="previousStep()">
+                            <i class="fas fa-arrow-left mr-2"></i>Anterior
+                        </button>
+
+                        <div class="flex space-x-4 w-full sm:w-auto">
+                            <button type="button" id="nextButton" class="flex-1 sm:flex-none btn-primary" onclick="nextStep()">
+                                Próximo<i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+
+                            <button type="submit" id="submitButton" class="flex-1 sm:flex-none btn-primary hidden">
+                                <i class="fas fa-check mr-2"></i>Criar Conta
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Help Section -->
+            <div class="mt-8 card p-6">
+                <div class="text-center">
+                    <h3 class="text-lg font-heading font-semibold text-secondary mb-2">
+                        <i class="fas fa-question-circle mr-2 text-primary"></i>Precisa de Ajuda?
+                    </h3>
+                    <p class="text-text-secondary mb-4">Nossa equipe está pronta para te ajudar no processo de cadastro</p>
+                    <div class="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-4">
+                        <a href="https://wa.me/5511999999999" class="inline-flex items-center justify-center px-4 py-2 bg-success text-white rounded-lg font-medium hover:bg-success-600 transition-colors duration-200">
+                            <i class="fab fa-whatsapp mr-2"></i>WhatsApp
+                        </a>
+                        <a href="tel:+551140004000" class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-text-secondary rounded-lg font-medium hover:bg-gray-50 transition-colors duration-200">
+                            <i class="fas fa-phone mr-2"></i>(11) 4000-4000
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login Link Section -->
+            <div class="mt-4 card p-6">
+                <div class="text-center">
+                    <h3 class="text-lg font-heading font-semibold text-secondary mb-2">
+                        <i class="fas fa-sign-in-alt mr-2 text-primary"></i>Já tem uma conta?
+                    </h3>
+                    <p class="text-text-secondary mb-4">Se você já é um motoboy cadastrado, faça login para acessar seu dashboard</p>
+                    <a href="/motoboys/login/" class="inline-flex items-center justify-center px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-600 transition-colors duration-200">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Fazer Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-100 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center text-text-secondary text-sm">
+                <p>&copy; 2025 MotoDelivery. Todos os direitos reservados.</p>
+                <p class="mt-1">Conectando entregadores e oportunidades no Brasil</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        let currentStep = 1;
+        const totalSteps = 4;
+
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Go back function
+        function goBack() {
+            if (currentStep > 1) {
+                previousStep();
+            } else {
+                window.history.back();
+            }
+        }
+
+        // Step navigation
+        function nextStep() {
+            if (validateCurrentStep()) {
+                if (currentStep < totalSteps) {
+                    document.getElementById(`step${currentStep}`).classList.add('hidden');
+                    currentStep++;
+                    document.getElementById(`step${currentStep}`).classList.remove('hidden');
+                    updateProgress();
+                    updateButtons();
+                    
+                    // Save progress to localStorage
+                    saveFormProgress();
+                }
+            }
+        }
+
+        function previousStep() {
+            if (currentStep > 1) {
+                document.getElementById(`step${currentStep}`).classList.add('hidden');
+                currentStep--;
+                document.getElementById(`step${currentStep}`).classList.remove('hidden');
+                updateProgress();
+                updateButtons();
+            }
+        }
+
+        function updateProgress() {
+            const progress = (currentStep / totalSteps) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = `Etapa ${currentStep} de ${totalSteps}`;
+        }
+
+        function updateButtons() {
+            const prevButton = document.getElementById('prevButton');
+            const nextButton = document.getElementById('nextButton');
+            const submitButton = document.getElementById('submitButton');
+
+            // Show/hide previous button
+            if (currentStep > 1) {
+                prevButton.classList.remove('hidden');
+            } else {
+                prevButton.classList.add('hidden');
+            }
+
+            // Show/hide next/submit buttons
+            if (currentStep === totalSteps) {
+                nextButton.classList.add('hidden');
+                submitButton.classList.remove('hidden');
+            } else {
+                nextButton.classList.remove('hidden');
+                submitButton.classList.add('hidden');
+            }
+        }
+
+        // Form validation
+        function validateCurrentStep() {
+            const currentStepElement = document.getElementById(`step${currentStep}`);
+            const requiredFields = currentStepElement.querySelectorAll('[required]');
+            let isValid = true;
+
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('border-error', 'focus:ring-error');
+                    field.classList.remove('border-gray-200', 'focus:ring-primary');
+                    isValid = false;
+                } else {
+                    field.classList.remove('border-error', 'focus:ring-error');
+                    field.classList.add('border-gray-200', 'focus:ring-primary');
+                }
+            });
+
+            if (!isValid) {
+                showNotification('Por favor, preencha todos os campos obrigatórios', 'error');
+            }
+
+            return isValid;
+        }
+
+        // Input formatters and validators
+        function formatCPF(input) {
+            let value = input.value.replace(/\D/g, '');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            input.value = value;
+            
+            if (value.length === 14) {
+                validateCPF(input);
+            }
+        }
+
+        function validateCPF(input) {
+            const cpf = input.value.replace(/\D/g, '');
+            const errorElement = document.getElementById('cpfError');
+            
+            if (cpf.length === 11 && isValidCPF(cpf)) {
+                errorElement.classList.add('hidden');
+                input.classList.remove('border-error', 'focus:ring-error');
+                input.classList.add('border-gray-200', 'focus:ring-primary');
+            } else {
+                errorElement.classList.remove('hidden');
+                input.classList.add('border-error', 'focus:ring-error');
+                input.classList.remove('border-gray-200', 'focus:ring-primary');
+            }
+        }
+
+        function isValidCPF(cpf) {
+            if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+            
+            let sum = 0;
+            for (let i = 0; i < 9; i++) {
+                sum += parseInt(cpf.charAt(i)) * (10 - i);
+            }
+            let remainder = (sum * 10) % 11;
+            if (remainder === 10 || remainder === 11) remainder = 0;
+            if (remainder !== parseInt(cpf.charAt(9))) return false;
+            
+            sum = 0;
+            for (let i = 0; i < 10; i++) {
+                sum += parseInt(cpf.charAt(i)) * (11 - i);
+            }
+            remainder = (sum * 10) % 11;
+            if (remainder === 10 || remainder === 11) remainder = 0;
+            return remainder === parseInt(cpf.charAt(10));
+        }
+
+        function formatPhone(input) {
+            let value = input.value.replace(/\D/g, '');
+            value = value.replace(/(\d{2})(\d)/, '($1) $2');
+            value = value.replace(/(\d{5})(\d)/, '$1-$2');
+            input.value = value;
+        }
+
+        function formatLicensePlate(input) {
+            let value = input.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+            if (value.length > 3) {
+                value = value.replace(/(\w{3})(\w)/, '$1-$2');
+            }
+            input.value = value;
+        }
+
+        function validateName(input) {
+            const errorElement = document.getElementById('nameError');
+            const words = input.value.trim().split(' ').filter(word => word.length > 0);
+            
+            if (words.length < 2) {
+                errorElement.classList.remove('hidden');
+                input.classList.add('border-error', 'focus:ring-error');
+                input.classList.remove('border-gray-200', 'focus:ring-primary');
+            } else {
+                errorElement.classList.add('hidden');
+                input.classList.remove('border-error', 'focus:ring-error');
+                input.classList.add('border-gray-200', 'focus:ring-primary');
+            }
+        }
+
+        // Email format validation
+        function validateEmailFormat(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        function validateEmail(input) {
+            const errorElement = document.getElementById('emailError');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (input.value && !emailRegex.test(input.value)) {
+                errorElement.classList.remove('hidden');
+                input.classList.add('border-error', 'focus:ring-error');
+                input.classList.remove('border-gray-200', 'focus:ring-primary');
+            } else {
+                errorElement.classList.add('hidden');
+                input.classList.remove('border-error', 'focus:ring-error');
+                input.classList.add('border-gray-200', 'focus:ring-primary');
+            }
+        }
+
+        function validateAge(input) {
+            const errorElement = document.getElementById('ageError');
+            const birthDate = new Date(input.value);
+            const today = new Date();
+            const age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            
+            if (age < 18) {
+                errorElement.classList.remove('hidden');
+                input.classList.add('border-error', 'focus:ring-error');
+                input.classList.remove('border-gray-200', 'focus:ring-primary');
+            } else {
+                errorElement.classList.add('hidden');
+                input.classList.remove('border-error', 'focus:ring-error');
+                input.classList.add('border-gray-200', 'focus:ring-primary');
+            }
+        }
+
+        // File upload handler
+        function handleFileUpload(input, previewId) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById(previewId);
+                    const img = preview.querySelector('img');
+                    img.src = e.target.result;
+                    img.onerror = function() {
+                        this.src = 'https://images.unsplash.com/photo-1584824486509-112e4181ff6b?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+                        this.onerror = null;
+                    };
+                    preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Save form progress to localStorage
+        function saveFormProgress() {
+            const formData = new FormData(document.getElementById('registrationForm'));
+            const data = {};
+            
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+            
+            data.currentStep = currentStep;
+            localStorage.setItem('motoboyRegistrationProgress', JSON.stringify(data));
+        }
+
+        // Load form progress from localStorage
+        function loadFormProgress() {
+            const savedData = localStorage.getItem('motoboyRegistrationProgress');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                
+                // Fill form fields
+                Object.keys(data).forEach(key => {
+                    if (key !== 'currentStep') {
+                        const field = document.querySelector(`[name="${key}"]`);
+                        if (field && field.type !== 'file') {
+                            field.value = data[key];
+                        }
+                    }
+                });
+                
+                // Restore step
+                if (data.currentStep && data.currentStep > 1) {
+                    document.getElementById(`step${currentStep}`).classList.add('hidden');
+                    currentStep = data.currentStep;
+                    document.getElementById(`step${currentStep}`).classList.remove('hidden');
+                    updateProgress();
+                    updateButtons();
+                }
+            }
+        }
+
+        // Form submission
+        function handleRegistration(event) {
+            event.preventDefault();
+            
+            if (!document.getElementById('terms').checked) {
+                showNotification('Você deve aceitar os termos de serviço', 'error');
+                return;
+            }
+            
+            const submitButton = document.getElementById('submitButton');
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Criando conta...';
+            submitButton.disabled = true;
+            
+            // Collect form data
+            const formData = new FormData(event.target);
+            const registrationData = {
+                email: formData.get('email'),
+                password: formData.get('password'),
+                full_name: formData.get('fullName'),
+                phone_number: formData.get('phone'),
+                document_type: formData.get('documentType'),
+                document_number: formData.get('documentNumber'),
+                vehicle_model: formData.get('bikeModel'),
+                vehicle_plate: formData.get('licensePlate'),
+                vehicle_year: formData.get('bikeYear'),
+                vehicle_color: formData.get('bikeColor')
+            };
+            
+            // Send registration request
+            fetch('/motoboys/register/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(registrationData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Clear saved progress
+                    localStorage.removeItem('motoboyRegistrationProgress');
+                    
+                    showNotification(data.message, 'success');
+                    
+                    // Redirect to dashboard after success
+                    setTimeout(() => {
+                        window.location.href = '/motoboys/dashboard/';
+                    }, 2000);
+                } else {
+                    showNotification(data.message, 'error');
+                    submitButton.innerHTML = '<i class="fas fa-arrow-right mr-2"></i>Criar Conta';
+                    submitButton.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Erro ao criar conta. Tente novamente.', 'error');
+                submitButton.innerHTML = '<i class="fas fa-arrow-right mr-2"></i>Criar Conta';
+                submitButton.disabled = false;
+            });
+        }
+        
+        // Check motoboy status
+        function checkMotoboyStatus(email) {
+            if (!email || !validateEmailFormat(email)) return;
+            
+            const statusDiv = document.getElementById('emailStatus');
+            statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Verificando...';
+            statusDiv.className = 'text-sm mt-1 text-text-secondary';
+            statusDiv.classList.remove('hidden');
+            
+            fetch(`/motoboys/check-status/?email=${encodeURIComponent(email)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.has_account) {
+                        // Usuário já tem conta
+                        statusDiv.innerHTML = `
+                            <i class="fas fa-info-circle mr-1 text-primary"></i>
+                            <span class="text-primary">${data.message}</span>
+                            <br>
+                            <a href="${data.redirect}" class="text-primary hover:text-primary-600 underline">
+                                Clique aqui para fazer login
+                            </a>
+                        `;
+                        statusDiv.className = 'text-sm mt-1 text-primary';
+                        
+                        // Desabilita o botão de cadastro
+                        const submitButton = document.getElementById('submitButton');
+                        if (submitButton) {
+                            submitButton.disabled = true;
+                            submitButton.innerHTML = '<i class="fas fa-info-circle mr-2"></i>Você já tem uma conta';
+                        }
+                    } else {
+                        // Email disponível para cadastro
+                        statusDiv.innerHTML = `<i class="fas fa-check-circle mr-1 text-success"></i><span class="text-success">${data.message}</span>`;
+                        statusDiv.className = 'text-sm mt-1 text-success';
+                        
+                        // Habilita o botão de cadastro
+                        const submitButton = document.getElementById('submitButton');
+                        if (submitButton) {
+                            submitButton.disabled = false;
+                            submitButton.innerHTML = '<i class="fas fa-user-plus mr-2"></i>Criar Conta';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    statusDiv.innerHTML = '<i class="fas fa-exclamation-circle mr-1 text-error"></i><span class="text-error">Erro ao verificar email</span>';
+                    statusDiv.className = 'text-sm mt-1 text-error';
+                });
+        }
+
+        // Get CSRF token from cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // Toggle password visibility
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const passwordIcon = document.getElementById('passwordIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordIcon.classList.remove('fa-eye');
+                passwordIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                passwordIcon.classList.remove('fa-eye-slash');
+                passwordIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Notification system
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full max-w-sm`;
+            
+            if (type === 'success') {
+                notification.classList.add('bg-success-100', 'text-success-800', 'border', 'border-success-200');
+                notification.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${message}`;
+            } else {
+                notification.classList.add('bg-error-100', 'text-error-800', 'border', 'border-error-200');
+                notification.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i>${message}`;
+            }
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Remove after 4 seconds
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 4000);
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFormProgress();
+            updateProgress();
+            updateButtons();
+            
+            // Preenche o device_id
+            const deviceIdField = document.getElementById('deviceIdField');
+            if (deviceIdField) {
+                const savedDeviceId = localStorage.getItem('moto_device_id');
+                if (savedDeviceId) {
+                    deviceIdField.value = savedDeviceId;
+                }
+            }
+            
+            // Auto-save form data on input
+            const form = document.getElementById('registrationForm');
+            form.addEventListener('input', function() {
+                clearTimeout(this.saveTimeout);
+                this.saveTimeout = setTimeout(saveFormProgress, 1000);
+            });
+        });
+
+        // Handle page unload
+        window.addEventListener('beforeunload', function() {
+            saveFormProgress();
+        });
+    </script>
+    <script src="/static/js/motoboy-nav.js"></script>
+
+</body>
+</html>

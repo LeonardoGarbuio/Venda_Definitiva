@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Login - MotoDelivery</title>
+    <link rel="stylesheet" href="../css/main.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+<script type="module" src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Fmotodelive8457back.builtwithrocket.new&_be=https%3A%2F%2Fapplication.rocket.new&_v=0.1.8"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50">
+    <!-- Header -->
+    <header class="bg-white shadow-subtle border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <div class="bg-primary text-white p-2 rounded-lg">
+                        <i class="fas fa-motorcycle text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-heading font-bold text-secondary">MotoDelivery</h1>
+                        <p class="text-xs text-text-secondary">Sistema de Gestão</p>
+                    </div>
+                </div>
+                
+                <!-- Navigation Links -->
+                <nav class="hidden md:flex items-center space-x-6">
+                    <a href="customer_order_menu.html" class="text-text-secondary hover:text-primary transition-colors duration-200">
+                        <i class="fas fa-utensils mr-2"></i>Cardápio
+                    </a>
+                    <a href="motoboy_registration.html" class="text-text-secondary hover:text-primary transition-colors duration-200">
+                        <i class="fas fa-user-plus mr-2"></i>Cadastro Motoboy
+                    </a>
+                    <a href="admin_login.html" class="text-primary font-semibold">
+                        <i class="fas fa-shield-alt mr-2"></i>Admin
+                    </a>
+                </nav>
+
+                <!-- Mobile Menu Button -->
+                <button class="md:hidden text-text-secondary hover:text-primary" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div id="mobileMenu" class="md:hidden hidden bg-white border-t border-gray-100">
+            <div class="px-4 py-3 space-y-3">
+                <a href="customer_order_menu.html" class="flex items-center text-text-secondary hover:text-primary transition-colors duration-200">
+                    <i class="fas fa-utensils mr-3"></i>Cardápio
+                </a>
+                <a href="motoboy_registration.html" class="flex items-center text-text-secondary hover:text-primary transition-colors duration-200">
+                    <i class="fas fa-user-plus mr-3"></i>Cadastro Motoboy
+                </a>
+                <a href="admin_login.html" class="flex items-center text-primary font-semibold">
+                    <i class="fas fa-shield-alt mr-3"></i>Admin
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex items-center justify-center px-4 py-12">
+        <div class="w-full max-w-md">
+            <!-- Login Card -->
+            <div class="card-elevated p-8">
+                <!-- Header -->
+                <div class="text-center mb-8">
+                    <div class="bg-primary-100 text-primary p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-shield-alt text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-heading font-bold text-secondary mb-2">Acesso Administrativo</h2>
+                    <p class="text-text-secondary">Entre com suas credenciais para acessar o painel</p>
+                </div>
+
+                <!-- Login Form -->
+                <form id="loginForm" class="space-y-6" onsubmit="handleLogin(event)">
+                    <!-- Email Field -->
+                    <div>
+                        <label for="email" class="block text-sm font-semibold text-secondary mb-2">
+                            <i class="fas fa-envelope mr-2 text-primary"></i>Email
+                        </label>
+                        <input type="email" id="email" name="email" class="form-input" placeholder="admin@motodelivery.com" required oninput="validateEmail(this)" />
+                        <div id="emailError" class="text-error text-sm mt-1 hidden">
+                            <i class="fas fa-exclamation-circle mr-1"></i>
+                            <span>Por favor, insira um email válido</span>
+                        </div>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div>
+                        <label for="password" class="block text-sm font-semibold text-secondary mb-2">
+                            <i class="fas fa-lock mr-2 text-primary"></i>Senha
+                        </label>
+                        <div class="relative">
+                            <input type="password" id="password" name="password" class="form-input pr-12" placeholder="Digite sua senha" required oninput="validatePassword(this)" />
+                            <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary hover:text-primary transition-colors duration-200" onclick="togglePassword()">
+                                <i id="passwordToggleIcon" class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div id="passwordError" class="text-error text-sm mt-1 hidden">
+                            <i class="fas fa-exclamation-circle mr-1"></i>
+                            <span>A senha deve ter pelo menos 6 caracteres</span>
+                        </div>
+                    </div>
+
+                    <!-- Remember Me -->
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="remember" class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary focus:ring-2" />
+                            <span class="ml-2 text-sm text-text-secondary">Lembrar de mim</span>
+                        </label>
+                    </div>
+
+                    <!-- Login Button -->
+                    <button type="submit" id="loginButton" class="w-full btn-primary flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Entrar</span>
+                    </button>
+
+                    <!-- Forgot Password Link -->
+                    <div class="text-center">
+                        <a href="javascript:void(0)" class="text-primary hover:text-primary-600 text-sm font-medium transition-colors duration-200">
+                            <i class="fas fa-question-circle mr-1"></i>Esqueci minha senha
+                        </a>
+                    </div>
+                </form>
+
+                <!-- Demo Credentials -->
+                <div class="mt-8 p-4 bg-accent-50 rounded-lg border border-accent-200">
+                    <h4 class="text-sm font-semibold text-accent-800 mb-2">
+                        <i class="fas fa-info-circle mr-2"></i>Credenciais de Demonstração
+                    </h4>
+                    <div class="text-sm text-accent-700 space-y-1">
+                        <p><strong>Email:</strong> admin@motodelivery.com</p>
+                        <p><strong>Senha:</strong> admin123</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Links -->
+            <div class="text-center mt-6 space-y-2">
+                <p class="text-text-secondary text-sm">Não é administrador?</p>
+                <div class="flex justify-center space-x-4">
+                    <a href="motoboy_registration.html" class="text-primary hover:text-primary-600 text-sm font-medium transition-colors duration-200">
+                        <i class="fas fa-motorcycle mr-1"></i>Cadastro Motoboy
+                    </a>
+                    <a href="customer_order_menu.html" class="text-primary hover:text-primary-600 text-sm font-medium transition-colors duration-200">
+                        <i class="fas fa-utensils mr-1"></i>Fazer Pedido
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-100 py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center text-text-secondary text-sm">
+                <p>&copy; 2025 MotoDelivery. Todos os direitos reservados.</p>
+                <p class="mt-1">Sistema de gestão de entregas desenvolvido no Brasil</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Password visibility toggle
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('passwordToggleIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Email validation
+        function validateEmail(input) {
+            const emailError = document.getElementById('emailError');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (input.value && !emailRegex.test(input.value)) {
+                emailError.classList.remove('hidden');
+                input.classList.add('border-error', 'focus:ring-error');
+                input.classList.remove('border-gray-200', 'focus:ring-primary');
+            } else {
+                emailError.classList.add('hidden');
+                input.classList.remove('border-error', 'focus:ring-error');
+                input.classList.add('border-gray-200', 'focus:ring-primary');
+            }
+        }
+
+        // Password validation
+        function validatePassword(input) {
+            const passwordError = document.getElementById('passwordError');
+            
+            if (input.value && input.value.length < 6) {
+                passwordError.classList.remove('hidden');
+                input.classList.add('border-error', 'focus:ring-error');
+                input.classList.remove('border-gray-200', 'focus:ring-primary');
+            } else {
+                passwordError.classList.add('hidden');
+                input.classList.remove('border-error', 'focus:ring-error');
+                input.classList.add('border-gray-200', 'focus:ring-primary');
+            }
+        }
+
+        // Form submission
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const loginButton = document.getElementById('loginButton');
+            
+            // Show loading state
+            loginButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Entrando...';
+            loginButton.disabled = true;
+            
+            // Simulate authentication delay
+            setTimeout(() => {
+                // Mock authentication
+                if (email === 'admin@motodelivery.com' && password === 'admin123') {
+                    // Store session
+                    localStorage.setItem('adminSession', JSON.stringify({
+                        email: email,
+                        loginTime: new Date().toISOString(),
+                        role: 'admin'
+                    }));
+                    
+                    // Show success message
+                    showNotification('Login realizado com sucesso!', 'success');
+                    
+                    // Redirect to dashboard
+                    setTimeout(() => {
+                        window.location.href = 'admin_dashboard.html';
+                    }, 1000);
+                } else {
+                    // Show error message
+                    showNotification('Email ou senha incorretos. Tente novamente.', 'error');
+                    
+                    // Reset button
+                    loginButton.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Entrar';
+                    loginButton.disabled = false;
+                }
+            }, 1500);
+        }
+
+        // Notification system
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
+            
+            if (type === 'success') {
+                notification.classList.add('bg-success-100', 'text-success-800', 'border', 'border-success-200');
+                notification.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${message}`;
+            } else {
+                notification.classList.add('bg-error-100', 'text-error-800', 'border', 'border-error-200');
+                notification.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i>${message}`;
+            }
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Check if already logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            const adminSession = localStorage.getItem('adminSession');
+            if (adminSession) {
+                const session = JSON.parse(adminSession);
+                const loginTime = new Date(session.loginTime);
+                const now = new Date();
+                const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
+                
+                // If session is less than 24 hours old, redirect to dashboard
+                if (hoursDiff < 24) {
+                    window.location.href = 'admin_dashboard.html';
+                }
+            }
+        });
+
+        // Auto-fill demo credentials on demo button click
+        function fillDemoCredentials() {
+            document.getElementById('email').value = 'admin@motodelivery.com';
+            document.getElementById('password').value = 'admin123';
+        }
+
+        // Add click handler to demo credentials
+        document.addEventListener('DOMContentLoaded', function() {
+            const demoSection = document.querySelector('.bg-accent-50');
+            if (demoSection) {
+                demoSection.style.cursor = 'pointer';
+                demoSection.addEventListener('click', fillDemoCredentials);
+                demoSection.title = 'Clique para preencher automaticamente';
+            }
+        });
+    </script>
+<script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
+</body>
+</html>

@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Motoboy - MotoDelivery</title>
+    <link rel="stylesheet" href="../css/main.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+<script type="module" src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Fmotodelive8457back.builtwithrocket.new&_be=https%3A%2F%2Fapplication.rocket.new&_v=0.1.8"></script>
+</head>
+<body class="min-h-screen bg-background">
+    <!-- Top Navigation -->
+    <header class="bg-white shadow-subtle border-b border-gray-100 sticky top-0 z-40">
+        <div class="px-4 py-3">
+            <div class="flex items-center justify-between">
+                <!-- Logo & Driver Info -->
+                <div class="flex items-center space-x-3">
+                    <div class="bg-primary text-white p-2 rounded-lg">
+                        <i class="fas fa-motorcycle text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-heading font-bold text-secondary">MotoDelivery</h1>
+                        <p class="text-xs text-text-secondary" id="driverName">Carlos Silva</p>
+                    </div>
+                </div>
+
+                <!-- Status Toggle & Profile -->
+                <div class="flex items-center space-x-3">
+                    <!-- Status Toggle -->
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-text-secondary">Status:</span>
+                        <button id="statusToggle" class="status-indicator status-success cursor-pointer transition-all duration-200" onclick="toggleDriverStatus()">
+                            <i class="fas fa-circle text-xs mr-1"></i>
+                            <span id="statusText">Online</span>
+                        </button>
+                    </div>
+
+                    <!-- Profile Menu -->
+                    <div class="relative">
+                        <button class="w-8 h-8 bg-primary-100 text-primary rounded-full flex items-center justify-center" onclick="toggleProfileMenu()">
+                            <i class="fas fa-user text-sm"></i>
+                        </button>
+                        
+                        <!-- Profile Dropdown -->
+                        <div id="profileMenu" class="hidden absolute right-0 top-10 bg-white rounded-lg shadow-elevated border border-gray-100 w-48 py-2 z-50">
+                            <a href="motoboy_registration.html" class="flex items-center px-4 py-2 text-text-secondary hover:bg-gray-50 transition-colors duration-200">
+                                <i class="fas fa-user-edit mr-3"></i>Editar Perfil
+                            </a>
+                            <a href="javascript:void(0)" class="flex items-center px-4 py-2 text-text-secondary hover:bg-gray-50 transition-colors duration-200">
+                                <i class="fas fa-chart-line mr-3"></i>Relatórios
+                            </a>
+                            <div class="border-t border-gray-100 my-1"></div>
+                            <a href="admin_login.html" class="flex items-center px-4 py-2 text-error hover:bg-error-50 transition-colors duration-200">
+                                <i class="fas fa-sign-out-alt mr-3"></i>Sair
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pb-20">
+        <!-- Map Section -->
+        <section class="relative h-64 bg-gradient-to-br from-primary-50 to-accent-50">
+            <!-- Map Container -->
+            <div id="mapContainer" class="w-full h-full relative overflow-hidden">
+                <!-- Map Background -->
+                <div class="absolute inset-0 bg-gradient-to-br from-primary-100 to-accent-100 flex items-center justify-center">
+                    <div class="text-center">
+                        <i class="fas fa-map-marked-alt text-4xl text-primary mb-2"></i>
+                        <p class="text-text-secondary text-sm">Carregando mapa...</p>
+                    </div>
+                </div>
+
+                <!-- Location Markers -->
+                <div class="absolute top-4 left-4 bg-white rounded-lg shadow-subtle p-2 flex items-center space-x-2">
+                    <div class="w-3 h-3 bg-success rounded-full animate-pulse"></div>
+                    <span class="text-sm text-text-secondary">Sua localização</span>
+                </div>
+
+                <!-- Route Info -->
+                <div class="absolute top-4 right-4 bg-white rounded-lg shadow-subtle p-3">
+                    <div class="text-center">
+                        <p class="text-xs text-text-secondary">Próxima entrega</p>
+                        <p class="text-sm font-semibold text-secondary">2.3 km</p>
+                        <p class="text-xs text-primary">8 min</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Controls -->
+                <div class="absolute bottom-4 right-4 flex flex-col space-y-2">
+                    <button class="bg-white p-2 rounded-lg shadow-subtle text-text-secondary hover:text-primary transition-colors duration-200">
+                        <i class="fas fa-crosshairs"></i>
+                    </button>
+                    <button class="bg-white p-2 rounded-lg shadow-subtle text-text-secondary hover:text-primary transition-colors duration-200" onclick="openNavigation()">
+                        <i class="fas fa-directions"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Earnings Summary -->
+        <section class="px-4 py-4 bg-white border-b border-gray-100">
+            <div class="grid grid-cols-3 gap-4">
+                <div class="text-center">
+                    <p class="text-2xl font-bold text-success" id="dailyEarnings">R$ 127,50</p>
+                    <p class="text-xs text-text-secondary">Ganhos Hoje</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-2xl font-bold text-primary" id="completedDeliveries">8</p>
+                    <p class="text-xs text-text-secondary">Entregas</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-2xl font-bold text-accent" id="averageTime">12min</p>
+                    <p class="text-xs text-text-secondary">Tempo Médio</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Assigned Orders -->
+        <section class="px-4 py-4">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-heading font-bold text-secondary">Pedidos Atribuídos</h2>
+                <span class="status-indicator bg-primary-100 text-primary">
+                    <i class="fas fa-clock mr-1"></i>
+                    <span id="pendingCount">3 pendentes</span>
+                </span>
+            </div>
+
+            <!-- Orders List -->
+            <div class="space-y-3" id="ordersList">
+                <!-- Order Card 1 - Active -->
+                <div class="card p-4 border-l-4 border-l-warning">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="text-sm font-semibold text-secondary">#MD-2025-001</span>
+                                <span class="status-indicator status-warning">
+                                    <i class="fas fa-motorcycle mr-1"></i>Em rota
+                                </span>
+                            </div>
+                            <p class="text-sm text-text-secondary mb-2">
+                                <i class="fas fa-map-marker-alt mr-1 text-primary"></i>
+                                Rua das Flores, 123 - Centro
+                            </p>
+                            <p class="text-xs text-text-secondary">
+                                <i class="fas fa-clock mr-1"></i>Entrega até: 14:30
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg font-bold text-success">R$ 18,50</p>
+                            <p class="text-xs text-text-secondary">Taxa: R$ 3,50</p>
+                        </div>
+                    </div>
+
+                    <!-- Order Items -->
+                    <div class="bg-gray-50 rounded-lg p-3 mb-3">
+                        <p class="text-sm font-semibold text-secondary mb-1">Itens do pedido:</p>
+                        <ul class="text-sm text-text-secondary space-y-1">
+                            <li>• 2x Hambúrguer Clássico</li>
+                            <li>• 1x Batata Frita Grande</li>
+                            <li>• 2x Refrigerante 350ml</li>
+                        </ul>
+                    </div>
+
+                    <!-- Customer Info -->
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-user text-primary"></i>
+                            <span class="text-sm text-secondary">Maria Santos</span>
+                        </div>
+                        <button class="text-primary hover:text-primary-600 transition-colors duration-200" onclick="callCustomer('11999887766')">
+                            <i class="fas fa-phone"></i>
+                        </button>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex space-x-2">
+                        <button class="flex-1 bg-success text-white py-2 px-4 rounded-lg text-sm font-semibold transition-all duration-200 hover:bg-success-600" onclick="updateOrderStatus('MD-2025-001', 'delivered')">
+                            <i class="fas fa-check mr-1"></i>Entregue
+                        </button>
+                        <button class="bg-gray-100 text-text-secondary py-2 px-4 rounded-lg text-sm transition-all duration-200 hover:bg-gray-200" onclick="viewOrderDetails('MD-2025-001')">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Order Card 2 - Pending -->
+                <div class="card p-4 border-l-4 border-l-primary">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="text-sm font-semibold text-secondary">#MD-2025-002</span>
+                                <span class="status-indicator bg-primary-100 text-primary">
+                                    <i class="fas fa-clock mr-1"></i>Pendente
+                                </span>
+                            </div>
+                            <p class="text-sm text-text-secondary mb-2">
+                                <i class="fas fa-map-marker-alt mr-1 text-primary"></i>
+                                Av. Paulista, 456 - Bela Vista
+                            </p>
+                            <p class="text-xs text-text-secondary">
+                                <i class="fas fa-clock mr-1"></i>Entrega até: 15:00
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg font-bold text-success">R$ 24,90</p>
+                            <p class="text-xs text-text-secondary">Taxa: R$ 4,50</p>
+                        </div>
+                    </div>
+
+                    <!-- Order Items -->
+                    <div class="bg-gray-50 rounded-lg p-3 mb-3">
+                        <p class="text-sm font-semibold text-secondary mb-1">Itens do pedido:</p>
+                        <ul class="text-sm text-text-secondary space-y-1">
+                            <li>• 1x Pizza Margherita (M)</li>
+                            <li>• 1x Refrigerante 2L</li>
+                        </ul>
+                    </div>
+
+                    <!-- Customer Info -->
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-user text-primary"></i>
+                            <span class="text-sm text-secondary">João Silva</span>
+                        </div>
+                        <button class="text-primary hover:text-primary-600 transition-colors duration-200" onclick="callCustomer('11988776655')">
+                            <i class="fas fa-phone"></i>
+                        </button>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex space-x-2">
+                        <button class="flex-1 btn-primary py-2 text-sm" onclick="updateOrderStatus('MD-2025-002', 'picked_up')">
+                            <i class="fas fa-box mr-1"></i>Coletado
+                        </button>
+                        <button class="bg-gray-100 text-text-secondary py-2 px-4 rounded-lg text-sm transition-all duration-200 hover:bg-gray-200" onclick="viewOrderDetails('MD-2025-002')">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Order Card 3 - New -->
+                <div class="card p-4 border-l-4 border-l-accent">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="text-sm font-semibold text-secondary">#MD-2025-003</span>
+                                <span class="status-indicator bg-accent-100 text-accent-800">
+                                    <i class="fas fa-star mr-1"></i>Novo
+                                </span>
+                            </div>
+                            <p class="text-sm text-text-secondary mb-2">
+                                <i class="fas fa-map-marker-alt mr-1 text-primary"></i>
+                                Rua Augusta, 789 - Consolação
+                            </p>
+                            <p class="text-xs text-text-secondary">
+                                <i class="fas fa-clock mr-1"></i>Entrega até: 15:30
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg font-bold text-success">R$ 32,00</p>
+                            <p class="text-xs text-text-secondary">Taxa: R$ 5,00</p>
+                        </div>
+                    </div>
+
+                    <!-- Order Items -->
+                    <div class="bg-gray-50 rounded-lg p-3 mb-3">
+                        <p class="text-sm font-semibold text-secondary mb-1">Itens do pedido:</p>
+                        <ul class="text-sm text-text-secondary space-y-1">
+                            <li>• 3x Açaí 500ml</li>
+                            <li>• Granola e frutas</li>
+                        </ul>
+                    </div>
+
+                    <!-- Customer Info -->
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-user text-primary"></i>
+                            <span class="text-sm text-secondary">Ana Costa</span>
+                        </div>
+                        <button class="text-primary hover:text-primary-600 transition-colors duration-200" onclick="callCustomer('11977665544')">
+                            <i class="fas fa-phone"></i>
+                        </button>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex space-x-2">
+                        <button class="flex-1 btn-secondary py-2 text-sm" onclick="acceptOrder('MD-2025-003')">
+                            <i class="fas fa-check mr-1"></i>Aceitar
+                        </button>
+                        <button class="bg-error-100 text-error-800 py-2 px-4 rounded-lg text-sm transition-all duration-200 hover:bg-error-200" onclick="declineOrder('MD-2025-003')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-4 py-2 z-30">
+        <div class="flex items-center justify-around">
+            <a href="motoboy_dashboard.html" class="flex flex-col items-center py-2 text-primary">
+                <i class="fas fa-home text-lg mb-1"></i>
+                <span class="text-xs">Dashboard</span>
+            </a>
+            <a href="javascript:void(0)" class="flex flex-col items-center py-2 text-text-secondary hover:text-primary transition-colors duration-200">
+                <i class="fas fa-route text-lg mb-1"></i>
+                <span class="text-xs">Rotas</span>
+            </a>
+            <a href="javascript:void(0)" class="flex flex-col items-center py-2 text-text-secondary hover:text-primary transition-colors duration-200">
+                <i class="fas fa-chart-bar text-lg mb-1"></i>
+                <span class="text-xs">Relatórios</span>
+            </a>
+            <a href="customer_order_menu.html" class="flex flex-col items-center py-2 text-text-secondary hover:text-primary transition-colors duration-200">
+                <i class="fas fa-utensils text-lg mb-1"></i>
+                <span class="text-xs">Cardápio</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Floating Action Button -->
+    <button class="floating-action" onclick="broadcastStatus()">
+        <i class="fas fa-broadcast-tower text-xl"></i>
+    </button>
+
+    <!-- Order Assignment Notification -->
+    <div id="orderNotification" class="hidden fixed top-20 left-4 right-4 bg-white rounded-lg shadow-floating border border-accent-200 p-4 z-50 animate-slide-up">
+        <div class="flex items-start space-x-3">
+            <div class="bg-accent-100 text-accent-800 p-2 rounded-lg">
+                <i class="fas fa-bell"></i>
+            </div>
+            <div class="flex-1">
+                <h4 class="font-semibold text-secondary mb-1">Novo Pedido Atribuído!</h4>
+                <p class="text-sm text-text-secondary mb-3">Pedido #MD-2025-004 - R$ 28,50</p>
+                <div class="flex space-x-2">
+                    <button class="btn-primary py-1 px-3 text-sm" onclick="acceptNewOrder()">Aceitar</button>
+                    <button class="bg-gray-100 text-text-secondary py-1 px-3 rounded-lg text-sm" onclick="hideNotification()">Recusar</button>
+                </div>
+            </div>
+            <button class="text-text-secondary hover:text-secondary" onclick="hideNotification()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div id="orderModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end">
+        <div class="bg-white rounded-t-lg w-full max-h-96 overflow-y-auto">
+            <div class="p-4 border-b border-gray-100">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-heading font-bold text-secondary">Detalhes do Pedido</h3>
+                    <button class="text-text-secondary hover:text-secondary" onclick="closeOrderModal()">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-4" id="orderModalContent">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Driver status management
+        let driverStatus = 'online';
+        
+        function toggleDriverStatus() {
+            const statusToggle = document.getElementById('statusToggle');
+            const statusText = document.getElementById('statusText');
+            
+            if (driverStatus === 'online') {
+                driverStatus = 'offline';
+                statusToggle.className = 'status-indicator status-error cursor-pointer transition-all duration-200';
+                statusText.textContent = 'Offline';
+            } else {
+                driverStatus = 'online';
+                statusToggle.className = 'status-indicator status-success cursor-pointer transition-all duration-200';
+                statusText.textContent = 'Online';
+            }
+            
+            showNotification(`Status alterado para ${driverStatus === 'online' ? 'Online' : 'Offline'}`, 'info');
+        }
+
+        // Profile menu toggle
+        function toggleProfileMenu() {
+            const menu = document.getElementById('profileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Close profile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('profileMenu');
+            const button = event.target.closest('button');
+            
+            if (!menu.contains(event.target) && !button?.onclick?.toString().includes('toggleProfileMenu')) {
+                menu.classList.add('hidden');
+            }
+        });
+
+        // Order status updates
+        function updateOrderStatus(orderId, status) {
+            const statusMap = {
+                'picked_up': { text: 'Coletado', class: 'status-warning', icon: 'fa-box' },
+                'en_route': { text: 'Em rota', class: 'status-warning', icon: 'fa-motorcycle' },
+                'delivered': { text: 'Entregue', class: 'status-success', icon: 'fa-check-circle' }
+            };
+            
+            const statusInfo = statusMap[status];
+            if (statusInfo) {
+                showNotification(`Pedido ${orderId} marcado como ${statusInfo.text}`, 'success');
+                
+                // Update earnings if delivered
+                if (status === 'delivered') {
+                    updateEarnings();
+                }
+            }
+        }
+
+        // Accept new order
+        function acceptOrder(orderId) {
+            showNotification(`Pedido ${orderId} aceito com sucesso!`, 'success');
+            updateOrderStatus(orderId, 'picked_up');
+        }
+
+        // Decline order
+        function declineOrder(orderId) {
+            showNotification(`Pedido ${orderId} recusado`, 'warning');
+        }
+
+        // Call customer
+        function callCustomer(phone) {
+            if (confirm(`Ligar para ${phone}?`)) {
+                window.location.href = `tel:${phone}`;
+            }
+        }
+
+        // View order details
+        function viewOrderDetails(orderId) {
+            const modal = document.getElementById('orderModal');
+            const content = document.getElementById('orderModalContent');
+            
+            // Mock order details
+            content.innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="font-semibold text-secondary mb-2">Informações do Cliente</h4>
+                        <div class="bg-gray-50 rounded-lg p-3">
+                            <p class="text-sm"><strong>Nome:</strong> Maria Santos</p>
+                            <p class="text-sm"><strong>Telefone:</strong> (11) 99988-7766</p>
+                            <p class="text-sm"><strong>Endereço:</strong> Rua das Flores, 123 - Centro</p>
+                            <p class="text-sm"><strong>Complemento:</strong> Apto 45, Bloco B</p>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-semibold text-secondary mb-2">Instruções Especiais</h4>
+                        <div class="bg-accent-50 rounded-lg p-3">
+                            <p class="text-sm text-accent-800">Entregar no portão principal. Tocar interfone apartamento 45.</p>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-semibold text-secondary mb-2">Pagamento</h4>
+                        <div class="bg-success-50 rounded-lg p-3">
+                            <p class="text-sm text-success-800">
+                                <i class="fas fa-credit-card mr-2"></i>Cartão de Crédito - Pago
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+
+        // Close order modal
+        function closeOrderModal() {
+            document.getElementById('orderModal').classList.add('hidden');
+        }
+
+        // Open navigation app
+        function openNavigation() {
+            const address = "Rua das Flores, 123 - Centro, São Paulo";
+            const encodedAddress = encodeURIComponent(address);
+            
+            // Try to open Google Maps app, fallback to web
+            const googleMapsApp = `comgooglemaps://?q=${encodedAddress}`;
+            const googleMapsWeb = `https://maps.google.com/maps?q=${encodedAddress}`;
+            
+            window.location.href = googleMapsApp;
+            
+            // Fallback to web version after a short delay
+            setTimeout(() => {
+                window.open(googleMapsWeb, '_blank');
+            }, 1000);
+        }
+
+        // Broadcast status
+        function broadcastStatus() {
+            showNotification('Status transmitido para a central', 'info');
+        }
+
+        // Update earnings
+        function updateEarnings() {
+            const earningsElement = document.getElementById('dailyEarnings');
+            const deliveriesElement = document.getElementById('completedDeliveries');
+            
+            let currentEarnings = parseFloat(earningsElement.textContent.replace('R$ ', '').replace(',', '.'));
+            let currentDeliveries = parseInt(deliveriesElement.textContent);
+            
+            currentEarnings += 18.50;
+            currentDeliveries += 1;
+            
+            earningsElement.textContent = `R$ ${currentEarnings.toFixed(2).replace('.', ',')}`;
+            deliveriesElement.textContent = currentDeliveries;
+            
+            // Update pending count
+            const pendingElement = document.getElementById('pendingCount');
+            const currentPending = parseInt(pendingElement.textContent.split(' ')[0]);
+            pendingElement.textContent = `${currentPending - 1} pendentes`;
+        }
+
+        // Show new order notification
+        function showOrderNotification() {
+            const notification = document.getElementById('orderNotification');
+            notification.classList.remove('hidden');
+            
+            // Auto-hide after 10 seconds
+            setTimeout(() => {
+                hideNotification();
+            }, 10000);
+        }
+
+        // Hide notification
+        function hideNotification() {
+            document.getElementById('orderNotification').classList.add('hidden');
+        }
+
+        // Accept new order from notification
+        function acceptNewOrder() {
+            hideNotification();
+            showNotification('Novo pedido aceito! Adicionado à sua lista.', 'success');
+        }
+
+        // Notification system
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full max-w-sm`;
+            
+            const typeClasses = {
+                'success': 'bg-success-100 text-success-800 border border-success-200',
+                'error': 'bg-error-100 text-error-800 border border-error-200',
+                'warning': 'bg-warning-100 text-warning-800 border border-warning-200',
+                'info': 'bg-primary-100 text-primary-800 border border-primary-200'
+            };
+            
+            const typeIcons = {
+                'success': 'fa-check-circle',
+                'error': 'fa-exclamation-circle',
+                'warning': 'fa-exclamation-triangle',
+                'info': 'fa-info-circle'
+            };
+            
+            notification.classList.add(...typeClasses[type].split(' '));
+            notification.innerHTML = `<i class="fas ${typeIcons[type]} mr-2"></i>${message}`;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Geolocation tracking
+        function startLocationTracking() {
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        
+                        // Update location in system (mock)
+                        console.log(`Location updated: ${lat}, ${lng}`);
+                    },
+                    function(error) {
+                        console.error('Geolocation error:', error);
+                        showNotification('Erro ao obter localização', 'error');
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 60000
+                    }
+                );
+            }
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if motoboy is logged in
+            const motoboySession = localStorage.getItem('motoboySession');
+            if (!motoboySession) {
+                window.location.href = 'motoboy_registration.html';
+                return;
+            }
+            
+            // Start location tracking
+            startLocationTracking();
+            
+            // Simulate new order notification after 5 seconds
+            setTimeout(() => {
+                if (Math.random() > 0.5) {
+                    showOrderNotification();
+                }
+            }, 5000);
+            
+            // Update time every minute
+            setInterval(() => {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('pt-BR', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                // Update any time displays
+                document.querySelectorAll('.current-time').forEach(el => {
+                    el.textContent = timeString;
+                });
+            }, 60000);
+        });
+
+        // Handle back button
+        window.addEventListener('popstate', function(event) {
+            const modal = document.getElementById('orderModal');
+            if (!modal.classList.contains('hidden')) {
+                closeOrderModal();
+                event.preventDefault();
+            }
+        });
+
+        // Mock session for demo
+        if (!localStorage.getItem('motoboySession')) {
+            localStorage.setItem('motoboySession', JSON.stringify({
+                email: 'motoboy@motodelivery.com',
+                name: 'Carlos Silva',
+                phone: '(11) 99999-8888',
+                vehicle: 'Honda CG 160',
+                loginTime: new Date().toISOString()
+            }));
+        }
+    </script>
+<script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
+</body>
+</html>

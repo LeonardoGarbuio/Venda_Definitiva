@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Finalizar Pedido - MotoDelivery</title>
+    <link rel="stylesheet" href="/static/css/main.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script type="module" src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Fmotodelive8457back.builtwithrocket.new&_be=https%3A%2F%2Fapplication.rocket.new&_v=0.1.8"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50">
+    <!-- Header with Cart Summary -->
+    <header class="bg-white shadow-subtle border-b border-gray-100 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <div class="bg-primary text-white p-2 rounded-lg">
+                        <i class="fas fa-motorcycle text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-heading font-bold text-secondary">MotoDelivery</h1>
+                        <p class="text-xs text-text-secondary">Finalizar Pedido</p>
+                    </div>
+                </div>
+                
+                <!-- Cart Summary -->
+                <div class="flex items-center space-x-4">
+                    <div class="hidden sm:flex items-center space-x-2 bg-primary-50 px-3 py-2 rounded-lg">
+                        <i class="fas fa-shopping-cart text-primary"></i>
+                        <span class="text-sm font-semibold text-secondary">3 itens</span>
+                        <span class="text-sm font-bold text-primary">R$ 45,90</span>
+                    </div>
+                    
+                    <!-- Mobile Menu Button -->
+                    <button class="md:hidden text-text-secondary hover:text-primary" onclick="toggleMobileMenu()">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Cart Summary -->
+        <div class="sm:hidden bg-primary-50 px-4 py-2 border-t border-primary-100">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-shopping-cart text-primary"></i>
+                    <span class="text-sm font-semibold text-secondary">3 itens no carrinho</span>
+                </div>
+                <span class="text-lg font-bold text-primary">R$ 45,90</span>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div id="mobileMenu" class="md:hidden hidden bg-white border-t border-gray-100">
+            <div class="px-4 py-3 space-y-3">
+                <a href="/" class="flex items-center text-text-secondary hover:text-primary transition-colors duration-200">
+                    <i class="fas fa-utensils mr-3"></i>Cardápio
+                </a>
+                <a href="/motoboys/register/" class="flex items-center text-text-secondary hover:text-primary transition-colors duration-200">
+                    <i class="fas fa-user-plus mr-3"></i>Cadastro Motoboy
+                </a>
+                                 <a href="/login/" class="flex items-center text-text-secondary hover:text-primary transition-colors duration-200">
+                     <i class="fas fa-shield-alt mr-3"></i>Admin
+                 </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <!-- Progress Indicator -->
+            <div class="mb-8">
+                <div class="flex items-center justify-center space-x-4">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-success text-white rounded-full flex items-center justify-center">
+                            <i class="fas fa-check text-sm"></i>
+                        </div>
+                        <span class="ml-2 text-sm font-medium text-success">Cardápio</span>
+                    </div>
+                    <div class="w-16 h-1 bg-success rounded"></div>
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center">
+                            <i class="fas fa-shopping-cart text-sm"></i>
+                        </div>
+                        <span class="ml-2 text-sm font-medium text-primary">Finalizar</span>
+                    </div>
+                    <div class="w-16 h-1 bg-gray-200 rounded"></div>
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-gray-200 text-gray-400 rounded-full flex items-center justify-center">
+                            <i class="fas fa-check text-sm"></i>
+                        </div>
+                        <span class="ml-2 text-sm font-medium text-gray-400">Confirmação</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Checkout Form -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Delivery Address Section -->
+                    <div class="card-elevated p-6">
+                        <h2 class="text-xl font-heading font-bold text-secondary mb-4 flex items-center">
+                            <i class="fas fa-map-marker-alt text-primary mr-3"></i>
+                            Endereço de Entrega
+                        </h2>
+                        
+                        <form id="checkoutForm" class="space-y-4">
+                            <!-- CEP Field -->
+                            <div class="grid sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="cep" class="block text-sm font-semibold text-secondary mb-2">
+                                        CEP (Portugal) *
+                                    </label>
+                                    <div class="relative">
+                                        <input type="text" id="cep" name="cep" class="form-input pr-10" placeholder="0000-000" maxlength="8" required oninput="formatPortugueseCEP(this)" onblur="searchAddressByCEP(this.value)" />
+                                        <div id="cepLoading" class="absolute right-3 top-1/2 transform -translate-y-1/2 hidden">
+                                            <i class="fas fa-spinner fa-spin text-primary"></i>
+                                        </div>
+                                    </div>
+                                    <div id="cepError" class="text-error text-sm mt-1 hidden">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        <span>CEP inválido</span>
+                                    </div>
+                                    <div id="cepSuccess" class="text-success text-sm mt-1 hidden">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        <span>Endereço encontrado!</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="city" class="block text-sm font-semibold text-secondary mb-2">
+                                        Cidade *
+                                    </label>
+                                    <input type="text" id="city" name="city" class="form-input bg-gray-50" placeholder="Cidade" readonly required />
+                                </div>
+                            </div>
+
+                            <!-- Address Fields -->
+                            <div>
+                                <label for="street" class="block text-sm font-semibold text-secondary mb-2">
+                                    Rua *
+                                </label>
+                                <input type="text" id="street" name="street" class="form-input bg-gray-50" placeholder="Nome da rua" readonly required />
+                            </div>
+
+                            <div class="grid sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="number" class="block text-sm font-semibold text-secondary mb-2">
+                                        Número *
+                                    </label>
+                                    <input type="text" id="number" name="number" class="form-input" placeholder="123" required onblur="calculateDeliveryFee()" />
+                                </div>
+                                <div>
+                                    <label for="complement" class="block text-sm font-semibold text-secondary mb-2">
+                                        Complemento
+                                    </label>
+                                    <input type="text" id="complement" name="complement" class="form-input" placeholder="Apto, Bloco..." />
+                                </div>
+                                <div>
+                                    <label for="neighborhood" class="block text-sm font-semibold text-secondary mb-2">
+                                        Freguesia *
+                                    </label>
+                                    <input type="text" id="neighborhood" name="neighborhood" class="form-input bg-gray-50" placeholder="Freguesia" readonly required />
+                                </div>
+                            </div>
+
+                            <!-- Map Preview -->
+                            <div class="mt-4">
+                                <div id="mapPreview" class="w-full h-64 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+                                    <div class="text-center text-gray-500">
+                                        <i class="fas fa-map text-3xl mb-2"></i>
+                                        <p class="text-sm">Preencha o CEP para ver no mapa</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="card-elevated p-6">
+                        <h2 class="text-xl font-heading font-bold text-secondary mb-4 flex items-center">
+                            <i class="fas fa-user text-primary mr-3"></i>
+                            Informações de Contato
+                        </h2>
+                        
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="customerName" class="block text-sm font-semibold text-secondary mb-2">
+                                    Nome Completo *
+                                </label>
+                                <input type="text" id="customerName" name="customerName" class="form-input" placeholder="Seu nome completo" required />
+                            </div>
+                            <div>
+                                <label for="phone" class="block text-sm font-semibold text-secondary mb-2">
+                                    Telefone *
+                                </label>
+                                <input type="tel" id="phone" name="phone" class="form-input" placeholder="(11) 99999-9999" required oninput="formatPhone(this)" />
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <label for="customerEmail" class="block text-sm font-semibold text-secondary mb-2">
+                                Email *
+                            </label>
+                            <input type="email" id="customerEmail" name="customerEmail" class="form-input" placeholder="seu@email.com" required />
+                        </div>
+
+                        <div class="mt-4">
+                            <label for="notes" class="block text-sm font-semibold text-secondary mb-2">
+                                Observações para Entrega
+                            </label>
+                            <textarea id="notes" name="notes" class="form-input" rows="3" placeholder="Instruções especiais para o entregador..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="card-elevated p-6">
+                        <h2 class="text-xl font-heading font-bold text-secondary mb-4 flex items-center">
+                            <i class="fas fa-credit-card text-primary mr-3"></i>
+                            Forma de Pagamento
+                        </h2>
+                        
+                        <div class="space-y-3">
+                            <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors duration-200">
+                                <input type="radio" name="paymentMethod" value="cash" class="w-4 h-4 text-primary border-gray-300 focus:ring-primary" checked />
+                                <div class="ml-3 flex items-center justify-between w-full">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-money-bill-wave text-success mr-3"></i>
+                                        <div>
+                                            <p class="font-semibold text-secondary">Dinheiro</p>
+                                            <p class="text-sm text-text-secondary">Pagamento na entrega</p>
+                                        </div>
+                                    </div>
+                                    <span class="status-indicator status-success">Disponível</span>
+                                </div>
+                            </label>
+
+                            <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors duration-200">
+                                <input type="radio" name="paymentMethod" value="card" class="w-4 h-4 text-primary border-gray-300 focus:ring-primary" />
+                                <div class="ml-3 flex items-center justify-between w-full">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-credit-card text-primary mr-3"></i>
+                                        <div>
+                                            <p class="font-semibold text-secondary">Cartão na Entrega</p>
+                                            <p class="text-sm text-text-secondary">Débito ou crédito</p>
+                                        </div>
+                                    </div>
+                                    <span class="status-indicator status-success">Disponível</span>
+                                </div>
+                            </label>
+
+                            <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors duration-200">
+                                <input type="radio" name="paymentMethod" value="pix" class="w-4 h-4 text-primary border-gray-300 focus:ring-primary" />
+                                <div class="ml-3 flex items-center justify-between w-full">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-qrcode text-accent mr-3"></i>
+                                        <div>
+                                            <p class="font-semibold text-secondary">PIX</p>
+                                            <p class="text-sm text-text-secondary">Pagamento instantâneo</p>
+                                        </div>
+                                    </div>
+                                    <span class="status-indicator status-success">Disponível</span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Change Field for Cash Payment -->
+                        <div id="changeField" class="mt-4">
+                            <label for="changeAmount" class="block text-sm font-semibold text-secondary mb-2">
+                                Troco para quanto?
+                            </label>
+                            <input type="text" id="changeAmount" name="changeAmount" class="form-input" placeholder="R$ 50,00" oninput="formatCurrency(this)" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Summary Sidebar -->
+                <div class="lg:col-span-1">
+                    <div class="card-elevated p-6 sticky top-24">
+                        <h2 class="text-xl font-heading font-bold text-secondary mb-4 flex items-center">
+                            <i class="fas fa-receipt text-primary mr-3"></i>
+                            Resumo do Pedido
+                        </h2>
+                        
+                        <!-- Order Items -->
+                        <div class="space-y-4 mb-6" id="orderItems">
+                            {% if cart_items %}
+                                {% for item in cart_items %}
+                                <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg" data-item-id="{{ item.id }}">
+                                    {% if item.menu_item.image %}
+                                        <img src="{{ item.menu_item.image.url }}" alt="{{ item.menu_item.name }}" class="w-12 h-12 object-cover rounded-lg" loading="lazy" />
+                                    {% else %}
+                                        <img src="https://images.unsplash.com/photo-1584824486509-112e4181ff6b?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="{{ item.menu_item.name }}" class="w-12 h-12 object-cover rounded-lg" loading="lazy" />
+                                    {% endif %}
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-secondary">{{ item.menu_item.name }}</h4>
+                                        <div class="flex items-center space-x-2 mt-1">
+                                            <button onclick="updateQuantity({{ item.id }}, -1)" class="w-6 h-6 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors">
+                                                <i class="fas fa-minus text-xs"></i>
+                                            </button>
+                                            <span class="text-sm font-medium text-secondary quantity-display" data-item-id="{{ item.id }}">{{ item.quantity }}</span>
+                                            <button onclick="updateQuantity({{ item.id }}, 1)" class="w-6 h-6 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors">
+                                                <i class="fas fa-plus text-xs"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col items-end space-y-1">
+                                        <span class="font-bold text-primary item-price" data-item-id="{{ item.id }}">R$ {{ item.total_price|floatformat:2 }}</span>
+                                        <button onclick="removeItem({{ item.id }})" class="text-red-500 hover:text-red-700 text-sm transition-colors">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center py-8 text-gray-500">
+                                    <i class="fas fa-shopping-cart text-4xl mb-2"></i>
+                                    <p>Carrinho vazio</p>
+                                    <a href="/" class="text-primary hover:underline mt-2 inline-block">Voltar ao cardápio</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                                    <p class="text-sm text-text-secondary">Quantidade: 1</p>
+                                </div>
+                            
+                            </div>
+                        </div>
+
+                        <!-- Order Totals -->
+                        <div class="border-t border-gray-200 pt-4 space-y-2" id="orderTotals">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-text-secondary">Subtotal</span>
+                                <span class="font-semibold text-secondary" id="subtotal">R$ {{ cart_total.subtotal|floatformat:2 }}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-text-secondary">Taxa de Entrega</span>
+                                <span class="font-semibold text-secondary" id="delivery-fee">R$ {{ cart_total.delivery_fee|floatformat:2 }}</span>
+                            </div>
+                            <div class="flex justify-between text-xs text-text-secondary" id="distance-info" style="display: none;">
+                                <span>Distância</span>
+                                <span id="distance-km">0 km</span>
+                            </div>
+                            <div class="flex justify-between text-lg font-bold border-t border-gray-200 pt-2">
+                                <span class="text-secondary">Total</span>
+                                <span class="text-primary" id="total">R$ {{ cart_total.total|floatformat:2 }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Delivery Time -->
+                        <div class="mt-6 p-4 bg-accent-50 rounded-lg border border-accent-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <i class="fas fa-clock text-accent mr-2"></i>
+                                    <span class="text-sm font-semibold text-accent-800">Tempo de Entrega</span>
+                                </div>
+                                <span class="text-sm font-bold text-accent-800">30-45 min</span>
+                            </div>
+                        </div>
+
+                        <!-- Security Badge -->
+                        <div class="mt-4 flex items-center justify-center space-x-2 text-xs text-text-secondary">
+                            <i class="fas fa-shield-alt text-success"></i>
+                            <span>Pedido 100% seguro</span>
+                        </div>
+
+                        <!-- Confirm Order Button -->
+                        <button type="button" id="confirmOrderBtn" class="w-full btn-primary mt-6 text-lg py-4" onclick="confirmOrder()">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            Confirmar Pedido
+                        </button>
+
+                        <!-- Back to Menu Link -->
+                        <div class="text-center mt-4">
+                            <a href="/" class="text-primary hover:text-primary-600 text-sm font-medium transition-colors duration-200">
+                                <i class="fas fa-arrow-left mr-1"></i>Voltar ao Cardápio
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-100 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center text-text-secondary text-sm">
+                <p>&copy; 2025 MotoDelivery. Todos os direitos reservados.</p>
+                <p class="mt-1">Entrega rápida e segura em toda a cidade</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full text-center">
+            <div class="w-16 h-16 bg-success-100 text-success rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-check text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-heading font-bold text-secondary mb-2">Pedido Confirmado!</h3>
+            <p class="text-text-secondary mb-6">Seu pedido foi recebido e está sendo preparado. Você receberá atualizações por WhatsApp.</p>
+            <div class="space-y-3">
+                <div class="text-sm text-text-secondary">
+                    <strong>Número do Pedido:</strong> #MD2025001
+                </div>
+                <div class="text-sm text-text-secondary">
+                    <strong>Tempo Estimado:</strong> 30-45 minutos
+                </div>
+            </div>
+            <button class="w-full btn-primary mt-6" onclick="closeSuccessModal()">
+                Acompanhar Pedido
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Portuguese CEP formatting and validation
+        function formatPortugueseCEP(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value.length > 4) {
+                value = value.replace(/^(\d{4})(\d)/, '$1-$2');
+            }
+            input.value = value;
+        }
+
+        // Search address by Portuguese CEP
+        function searchAddressByCEP(cep) {
+            if (!cep || cep.length < 7) return;
+            
+            const cepClean = cep.replace(/\D/g, '');
+            if (cepClean.length !== 7) return;
+            
+            const cepLoading = document.getElementById('cepLoading');
+            const cepError = document.getElementById('cepError');
+            const cepSuccess = document.getElementById('cepSuccess');
+            const cityField = document.getElementById('city');
+            const streetField = document.getElementById('street');
+            const neighborhoodField = document.getElementById('neighborhood');
+            const mapPreview = document.getElementById('mapPreview');
+            
+            // Show loading
+            cepLoading.classList.remove('hidden');
+            cepError.classList.add('hidden');
+            cepSuccess.classList.add('hidden');
+            
+            // Simulate API call to Portuguese postal service
+            setTimeout(() => {
+                // Mock Portuguese address data based on CEP
+                const mockAddresses = {
+                    '1000': { city: 'Lisboa', street: 'Rua Augusta', neighborhood: 'Baixa' },
+                    '2000': { city: 'Santarém', street: 'Rua do Comércio', neighborhood: 'Centro' },
+                    '3000': { city: 'Coimbra', street: 'Rua Ferreira Borges', neighborhood: 'Baixa' },
+                    '4000': { city: 'Porto', street: 'Rua das Flores', neighborhood: 'Centro' },
+                    '5000': { city: 'Vila Real', street: 'Rua Central', neighborhood: 'Centro' },
+                    '6000': { city: 'Castelo Branco', street: 'Rua Principal', neighborhood: 'Centro' },
+                    '7000': { city: 'Évora', street: 'Rua do Raimundo', neighborhood: 'Centro' },
+                    '8000': { city: 'Faro', street: 'Rua de Santo António', neighborhood: 'Centro' },
+                    '9000': { city: 'Funchal', street: 'Rua do Carmo', neighborhood: 'Centro' }
+                };
+                
+                const cepPrefix = cepClean.substring(0, 4);
+                const address = mockAddresses[cepPrefix];
+                
+                if (address) {
+                    // Fill in the fields
+                    cityField.value = address.city;
+                    streetField.value = address.street;
+                    neighborhoodField.value = address.neighborhood;
+                    
+                    // Show success message
+                    cepSuccess.classList.remove('hidden');
+                    cepError.classList.add('hidden');
+                    
+                    // Update map with OpenStreetMap
+                    updateMap(address.city, address.street, address.neighborhood);
+                } else {
+                    // Show error message
+                    cepError.classList.remove('hidden');
+                    cepSuccess.classList.add('hidden');
+                    cepError.querySelector('span').textContent = 'CEP não encontrado';
+                }
+                
+                // Hide loading
+                cepLoading.classList.add('hidden');
+            }, 1000);
+        }
+
+        // Update map with OpenStreetMap
+        function updateMap(city, street, neighborhood) {
+            const mapPreview = document.getElementById('mapPreview');
+            
+            // Create map container
+            mapPreview.innerHTML = `
+                <div id="map" class="w-full h-full rounded-lg"></div>
+            `;
+            
+            // Initialize OpenStreetMap with Leaflet
+            const map = L.map('map').setView([38.7223, -9.1393], 13); // Default to Lisbon coordinates
+            
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            // Add marker for the address
+            const marker = L.marker([38.7223, -9.1393]).addTo(map);
+            marker.bindPopup(`<b>${street}</b><br>${neighborhood}, ${city}`).openPopup();
+            
+            // Try to geocode the address (simulated)
+            setTimeout(() => {
+                // Simulate geocoding with different coordinates for different cities
+                const cityCoordinates = {
+                    'Lisboa': [38.7223, -9.1393],
+                    'Porto': [41.1579, -8.6291],
+                    'Coimbra': [40.2033, -8.4103],
+                    'Santarém': [39.2362, -8.6869],
+                    'Vila Real': [41.2956, -7.7463],
+                    'Castelo Branco': [39.8222, -7.4909],
+                    'Évora': [38.5714, -7.9135],
+                    'Faro': [37.0194, -7.9304],
+                    'Funchal': [32.6669, -16.9241]
+                };
+                
+                const coords = cityCoordinates[city] || [38.7223, -9.1393];
+                map.setView(coords, 15);
+                marker.setLatLng(coords);
+                marker.bindPopup(`<b>${street}</b><br>${neighborhood}, ${city}`).openPopup();
+                
+                // Calculate delivery fee after map is updated
+                calculateDeliveryFee();
+            }, 500);
+        }
+
+        // Calculate delivery fee based on address
+        function calculateDeliveryFee() {
+            const street = document.getElementById('street').value;
+            const city = document.getElementById('city').value;
+            const neighborhood = document.getElementById('neighborhood').value;
+            const number = document.getElementById('number').value;
+            
+            if (!street || !city || !neighborhood || !number) {
+                return;
+            }
+            
+            const deliveryAddress = `${street}, ${number}, ${neighborhood}, ${city}`;
+            
+            fetch('/orders/calculate-delivery-fee/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    delivery_address: deliveryAddress
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update delivery fee and totals
+                    document.getElementById('delivery-fee').textContent = `R$ ${data.delivery_fee.toFixed(2)}`;
+                    document.getElementById('total').textContent = `R$ ${data.cart_total.total.toFixed(2)}`;
+                    
+                    // Show distance info
+                    document.getElementById('distance-info').style.display = 'flex';
+                    document.getElementById('distance-km').textContent = `${data.distance_km} km`;
+                    
+                    // Show notification
+                    showNotification(`Taxa de entrega calculada: R$ ${data.delivery_fee.toFixed(2)} (${data.distance_km} km)`, 'success');
+                } else {
+                    showNotification(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Erro ao calcular taxa de entrega', 'error');
+            });
+        }
+
+        // Phone formatting
+        function formatPhone(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value.length > 10) {
+                value = value.replace(/^(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            } else if (value.length > 6) {
+                value = value.replace(/^(\d{2})(\d{4})(\d)/, '($1) $2-$3');
+            } else if (value.length > 2) {
+                value = value.replace(/^(\d{2})(\d)/, '($1) $2');
+            }
+            input.value = value;
+        }
+
+        // Currency formatting
+        function formatCurrency(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value) {
+                value = (parseInt(value) / 100).toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                });
+            }
+            input.value = value;
+        }
+
+        // Payment method change handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const paymentRadios = document.querySelectorAll('input[name="paymentMethod"]');
+            const changeField = document.getElementById('changeField');
+            
+            paymentRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'cash') {
+                        changeField.style.display = 'block';
+                    } else {
+                        changeField.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Form validation
+        function validateForm() {
+            const requiredFields = [
+                'cep', 'city', 'street', 'number', 'neighborhood', 
+                'customerName', 'phone', 'customerEmail'
+            ];
+            
+            let isValid = true;
+            
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (!field.value.trim()) {
+                    field.classList.add('border-error', 'focus:ring-error');
+                    field.classList.remove('border-gray-200', 'focus:ring-primary');
+                    isValid = false;
+                } else {
+                    field.classList.remove('border-error', 'focus:ring-error');
+                    field.classList.add('border-gray-200', 'focus:ring-primary');
+                }
+            });
+            
+            return isValid;
+        }
+
+        // Update item quantity
+        function updateQuantity(itemId, change) {
+            const quantityDisplay = document.querySelector(`.quantity-display[data-item-id="${itemId}"]`);
+            const currentQuantity = parseInt(quantityDisplay.textContent);
+            const newQuantity = currentQuantity + change;
+            
+            if (newQuantity <= 0) {
+                removeItem(itemId);
+                return;
+            }
+            
+            // Update quantity display
+            quantityDisplay.textContent = newQuantity;
+            
+            // Send update to server
+            fetch('/orders/cart/update/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    item_id: itemId,
+                    quantity: newQuantity
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update item price
+                    const itemPriceElement = document.querySelector(`.item-price[data-item-id="${itemId}"]`);
+                    if (data.cart && data.cart.subtotal) {
+                        // Calculate item price based on new quantity
+                        const itemPrice = (data.cart.subtotal / data.cart.item_count) * newQuantity;
+                        itemPriceElement.textContent = `R$ ${itemPrice.toFixed(2)}`;
+                    }
+                    
+                    // Update totals
+                    updateOrderTotals(data.cart);
+                    showNotification(data.message, 'success');
+                } else {
+                    showNotification(data.message, 'error');
+                    // Revert quantity display
+                    quantityDisplay.textContent = currentQuantity;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Erro ao atualizar quantidade', 'error');
+                // Revert quantity display
+                quantityDisplay.textContent = currentQuantity;
+            });
+        }
+
+        // Remove item from cart
+        function removeItem(itemId) {
+            if (!confirm('Tem certeza que deseja remover este item do carrinho?')) {
+                return;
+            }
+            
+            fetch('/orders/cart/remove/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    item_id: itemId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove item from DOM
+                    const itemElement = document.querySelector(`[data-item-id="${itemId}"]`);
+                    if (itemElement) {
+                        itemElement.remove();
+                    }
+                    
+                    // Update totals
+                    updateOrderTotals(data.cart);
+                    showNotification(data.message, 'success');
+                    
+                    // Check if cart is empty
+                    const remainingItems = document.querySelectorAll('[data-item-id]');
+                    if (remainingItems.length === 0) {
+                        // Redirect to menu if cart is empty
+                        window.location.href = '/';
+                    }
+                } else {
+                    showNotification(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Erro ao remover item', 'error');
+            });
+        }
+
+        // Update order totals
+        function updateOrderTotals(cartData) {
+            if (cartData) {
+                document.getElementById('subtotal').textContent = `R$ ${cartData.subtotal.toFixed(2)}`;
+                document.getElementById('delivery-fee').textContent = `R$ ${cartData.delivery_fee.toFixed(2)}`;
+                document.getElementById('total').textContent = `R$ ${cartData.total.toFixed(2)}`;
+            }
+        }
+
+        // Confirm order
+        function confirmOrder() {
+            if (!validateForm()) {
+                showNotification('Por favor, preencha todos os campos obrigatórios.', 'error');
+                return;
+            }
+            
+            const confirmBtn = document.getElementById('confirmOrderBtn');
+            
+            // Show loading state
+            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processando...';
+            confirmBtn.disabled = true;
+            
+            // Prepare order data
+            const orderData = {
+                customer_name: document.getElementById('customerName').value,
+                customer_email: document.getElementById('customerEmail').value,
+                customer_phone: document.getElementById('phone').value,
+                pickup_address: 'Restaurante MotoDelivery', // Endereço do restaurante
+                delivery_address: `${document.getElementById('street').value}, ${document.getElementById('number').value} - ${document.getElementById('neighborhood').value}, ${document.getElementById('city').value}`,
+                description: 'Pedido do cardápio',
+                base_price: parseFloat('{{ cart_total.total|floatformat:2 }}'), // Total do carrinho
+                notes: document.getElementById('notes').value || ''
+            };
+            
+            // Send order to server
+            fetch('/orders/create/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(orderData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success modal
+                    document.getElementById('successModal').classList.remove('hidden');
+                    // Clear cart
+                    localStorage.removeItem('orderCart');
+                } else {
+                    showNotification(data.message || 'Erro ao processar pedido', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Erro ao processar pedido', 'error');
+            })
+            .finally(() => {
+                // Reset button
+                confirmBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Confirmar Pedido';
+                confirmBtn.disabled = false;
+            });
+        }
+
+        // Close success modal
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.add('hidden');
+            // Redirect to order tracking or menu
+            window.location.href = '/';
+        }
+
+        // Notification system
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
+            
+            if (type === 'success') {
+                notification.classList.add('bg-success-100', 'text-success-800', 'border', 'border-success-200');
+                notification.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${message}`;
+            } else {
+                notification.classList.add('bg-error-100', 'text-error-800', 'border', 'border-error-200');
+                notification.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i>${message}`;
+            }
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Auto-save form data to localStorage
+        function saveFormData() {
+            const formData = {
+                cep: document.getElementById('cep').value,
+                city: document.getElementById('city').value,
+                street: document.getElementById('street').value,
+                number: document.getElementById('number').value,
+                complement: document.getElementById('complement').value,
+                neighborhood: document.getElementById('neighborhood').value,
+                customerName: document.getElementById('customerName').value,
+                customerEmail: document.getElementById('customerEmail').value,
+                phone: document.getElementById('phone').value,
+                notes: document.getElementById('notes').value,
+                paymentMethod: document.querySelector('input[name="paymentMethod"]:checked')?.value,
+                changeAmount: document.getElementById('changeAmount').value
+            };
+            
+            localStorage.setItem('checkoutFormData', JSON.stringify(formData));
+        }
+
+        // Load saved form data
+        function loadFormData() {
+            const savedData = localStorage.getItem('checkoutFormData');
+            if (savedData) {
+                const formData = JSON.parse(savedData);
+                
+                Object.keys(formData).forEach(key => {
+                    const field = document.getElementById(key);
+                    if (field && formData[key]) {
+                        if (key === 'paymentMethod') {
+                            const radio = document.querySelector(`input[name="paymentMethod"][value="${formData[key]}"]`);
+                            if (radio) radio.checked = true;
+                        } else {
+                            field.value = formData[key];
+                        }
+                    }
+                });
+            }
+        }
+
+        // Get CSRF token from cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Initialize form
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFormData();
+            
+            // Auto-save on input
+            const formInputs = document.querySelectorAll('#checkoutForm input, #checkoutForm textarea');
+            formInputs.forEach(input => {
+                input.addEventListener('input', saveFormData);
+                input.addEventListener('change', saveFormData);
+            });
+        });
+    </script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+</body>
+</html>
