@@ -203,15 +203,24 @@ def check_device_status(request):
             print(f"❌ Device_id não encontrado no banco, mas foi enviado pelo frontend")
             print(f"❌ Isso indica um problema de sincronização")
     
-    # 4. Se não recebeu device_id ou não encontrou cadastro, gera um novo
+    # 4. IMPORTANTE: NÃO gera device_id automaticamente!
+    # Só gera quando o usuário realmente criar a conta
     if not device_id or not device_id.strip():
-        print(f"🆕 GERANDO NOVO DEVICE_ID (frontend não enviou ou enviou vazio)")
-        device_id = generate_device_id(request)
-        print(f"🆕 Novo Device ID gerado: {device_id}")
-    else:
-        print(f"🔄 REUTILIZANDO DEVICE_ID ENVIADO PELO FRONTEND: {device_id}")
+        print(f"🆕 FRONTEND NÃO ENVIOU DEVICE_ID")
+        print(f"🆕 NÃO GERANDO AUTOMATICAMENTE - aguardando criação da conta")
+        # Retorna sem device_id para forçar cadastro
+        return JsonResponse({
+            'is_new_device': True,
+            'show_register': True,
+            'show_login': False,
+            'device_id': None,
+            'message': 'Dispositivo novo - aguardando cadastro'
+        })
     
-    # 5. Mostra cadastro para dispositivo novo
+    # 5. Se chegou aqui, tem device_id mas não encontrou cadastro
+    print(f"🔄 REUTILIZANDO DEVICE_ID ENVIADO PELO FRONTEND: {device_id}")
+    
+    # 6. Mostra cadastro para dispositivo novo
     print(f"📝 Dispositivo novo, mostrando cadastro")
     print(f"=== FIM DEBUG ===")
     return JsonResponse({
@@ -397,6 +406,12 @@ def motoboy_register(request):
             data = json.loads(request.body)
             device_id = data.get('device_id')  # Pega o device_id do JSON
             
+            print(f"=== DEBUG MOTOBOY_REGISTER ===")
+            print(f"Device ID recebido: {device_id}")
+            print(f"Tipo do device_id: {type(device_id)}")
+            print(f"Dados completos: {data}")
+            print(f"=============================")
+            
             # Validações básicas
             required_fields = ['email', 'password', 'full_name', 'phone_number', 
                              'document_type', 'document_number', 'vehicle_model', 
@@ -440,6 +455,10 @@ def motoboy_register(request):
             )
             
             # Cria o motoboy
+            print(f"🔧 SALVANDO MOTOBOY NO BANCO...")
+            print(f"🔧 Device ID a salvar: {device_id}")
+            print(f"🔧 Device IDs array: {[device_id] if device_id else []}")
+            
             motoboy = Motoboy.objects.create(
                 user=user,
                 full_name=data['full_name'],
@@ -453,6 +472,11 @@ def motoboy_register(request):
                 status='offline',  # Começa offline
                 device_ids=[device_id] if device_id else []  # Salva o device_id
             )
+            
+            print(f"✅ MOTOBOY SALVO COM SUCESSO!")
+            print(f"✅ ID do motoboy: {motoboy.id}")
+            print(f"✅ Device IDs salvos: {motoboy.device_ids}")
+            print(f"✅ Tipo dos device_ids: {type(motoboy.device_ids)}")
             
             # Faz login automático
             user = authenticate(username=data['email'], password=data['password'])

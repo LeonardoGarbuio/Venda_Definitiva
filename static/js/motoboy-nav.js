@@ -21,8 +21,8 @@
             // precisamos descobrir qual é o device_id correto para este dispositivo
             if (!deviceId) {
                 console.log('🆕 NENHUM DEVICE_ID NO LOCALSTORAGE');
-                console.log('🆕 Enviando requisição SEM device_id para o backend descobrir');
-                // Se não tem device_id, envia requisição sem parâmetro
+                console.log('🆕 Enviando requisição SEM device_id para forçar CADASTRO');
+                // Se não tem device_id, NÃO envia para forçar cadastro
                 deviceId = null;
             } else {
                 console.log('✅ DEVICE_ID JÁ EXISTIA NO LOCALSTORAGE:', deviceId);
@@ -56,15 +56,17 @@
                         console.log(`  ${key}:`, data[key], `(tipo: ${typeof data[key]})`);
                     });
                     
-                    // SEMPRE usa o device_id que o backend retorna
-                    if (data.device_id) {
+                    // IMPORTANTE: Só salva device_id se o backend retornou um
+                    // E se não estamos na página de cadastro
+                    if (data.device_id && data.device_id !== 'null' && data.device_id !== null) {
                         console.log('🔄 DEVICE_ID RECEBIDO DO BACKEND:', data.device_id);
                         console.log('🔄 Atualizando localStorage...');
                         localStorage.setItem('device_id', data.device_id);
                         deviceId = data.device_id;
                         console.log('🔄 localStorage atualizado com:', deviceId);
                     } else {
-                        console.log('⚠️ BACKEND NÃO RETORNOU DEVICE_ID');
+                        console.log('⚠️ BACKEND NÃO RETORNOU DEVICE_ID OU RETORNOU NULL');
+                        console.log('⚠️ Mantendo localStorage limpo para forçar cadastro');
                     }
                     
                     console.log('📋 RESUMO FINAL:');
@@ -146,8 +148,8 @@
             const mobileNav = document.getElementById('motoboyMobileNav');
             
             console.log('🔍 ELEMENTOS ENCONTRADOS:');
-            console.log('  motoboyNav (desktop):', desktopNav);
-            console.log('  motoboyMobileNav (mobile):', mobileNav);
+            console.log('  desktopNav:', desktopNav);
+            console.log('  mobileNav:', mobileNav);
             
             if (!desktopNav || !mobileNav) {
                 console.log('❌ ELEMENTOS DE NAVEGAÇÃO NÃO ENCONTRADOS!');
@@ -254,5 +256,86 @@
             // NÃO limpa mais o device_id - deixa o sistema funcionar normalmente
             console.log('🚀 INICIANDO SISTEMA DE IDENTIFICAÇÃO DE MOTOBOY...');
             
-            checkDeviceStatus();
+            // SEM DELAY - executa imediatamente
+            console.log('⚡ EXECUTANDO IMEDIATAMENTE - verificando elementos...');
+            
+            const desktopNav = document.getElementById('motoboyNav');
+            const mobileNav = document.getElementById('motoboyMobileNav');
+            
+            console.log('🔍 VERIFICAÇÃO DOS ELEMENTOS:');
+            console.log('  desktopNav:', desktopNav);
+            console.log('  mobileNav:', mobileNav);
+            console.log('  desktopNav existe:', !!desktopNav);
+            console.log('  mobileNav existe:', !!mobileNav);
+            console.log('  Document readyState:', document.readyState);
+            
+            // Lista todos os elementos com ID para debug
+            console.log('🔍 TODOS OS ELEMENTOS COM ID:');
+            document.querySelectorAll('[id]').forEach(el => {
+                console.log(`  ${el.id}:`, el);
+            });
+            
+            if (!desktopNav || !mobileNav) {
+                console.error('❌ ELEMENTOS NÃO ENCONTRADOS!');
+                console.error('❌ Verifique se os elementos #motoboyNav e #motoboyMobileNav existem na página');
+                return;
+            }
+            
+            console.log('✅ ELEMENTOS ENCONTRADOS!');
+                
+                // FUNÇÃO PARA TESTE: Limpar device_id e forçar cadastro
+                function forceNewDevice() {
+                    console.log('🧹 FORÇANDO NOVO DEVICE_ID PARA TESTE...');
+                    localStorage.removeItem('device_id');
+                    localStorage.removeItem('moto_device_id');
+                    localStorage.removeItem('motoboyRegistrationProgress');
+                    localStorage.removeItem('motoboySession');
+                    console.log('🧹 Device_id e dados relacionados removidos!');
+                    console.log('🧹 Recarregue a página para testar como dispositivo novo!');
+                }
+                
+                // FUNÇÃO PARA GERAR DEVICE_ID APENAS NO CADASTRO
+                function generateDeviceIdForRegistration() {
+                    console.log('🔧 GERANDO DEVICE_ID APENAS PARA CADASTRO...');
+                    
+                    // Simula a lógica do backend para gerar device_id
+                    const userAgent = navigator.userAgent;
+                    const language = navigator.language;
+                    const encoding = 'gzip, deflate, br';
+                    const host = window.location.host;
+                    const referer = document.referrer || '';
+                    const ip = '127.0.0.1'; // IP local para desenvolvimento
+                    
+                    const deviceString = `${ip}|${userAgent}|${language}|${encoding}|${host}|${referer}`;
+                    console.log('🔧 Device string:', deviceString);
+                    
+                    // Hash simples (simulando o backend)
+                    let hash = 0;
+                    for (let i = 0; i < deviceString.length; i++) {
+                        const char = deviceString.charCodeAt(i);
+                        hash = ((hash << 5) - hash) + char;
+                        hash = hash & hash;
+                    }
+                    
+                    const deviceId = Math.abs(hash).toString(16).substring(0, 16);
+                    console.log('🔧 Device ID gerado para cadastro:', deviceId);
+                    
+                    // Salva no localStorage para usar no cadastro
+                    localStorage.setItem('device_id', deviceId);
+                    return deviceId;
+                }
+                
+                // Adiciona botões de teste no console
+                console.log('🧪 PARA TESTAR COMO DISPOSITIVO NOVO, execute no console:');
+                console.log('🧪 forceNewDevice()');
+                console.log('🔧 PARA GERAR DEVICE_ID PARA CADASTRO, execute no console:');
+                console.log('🔧 generateDeviceIdForRegistration()');
+                
+                // Torna as funções globais para teste
+                window.forceNewDevice = forceNewDevice;
+                window.generateDeviceIdForRegistration = generateDeviceIdForRegistration;
+                
+                checkDeviceStatus();
         });
+
+        

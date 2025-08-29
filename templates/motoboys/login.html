@@ -61,6 +61,7 @@
 
                 <!-- Login Form -->
                 <form id="loginForm" class="space-y-6" onsubmit="handleLogin(event)">
+                    {% csrf_token %}
                     <!-- Email Field -->
                     <div>
                         <label for="email" class="block text-sm font-semibold text-secondary mb-2">
@@ -175,12 +176,20 @@
             loginButton.disabled = true;
             
             const formData = new FormData(event.target);
+            const deviceId = localStorage.getItem('moto_device_id') || null;
+            console.log('=== DEBUG LOGIN FORM ===');
+            console.log('Device ID do localStorage:', deviceId);
+            console.log('Tipo do device_id:', typeof deviceId);
+            
             const loginData = {
                 email: formData.get('email'),
                 password: formData.get('password'),
                 remember_me: formData.get('remember') === 'on',
-                device_id: localStorage.getItem('moto_device_id') || null
+                device_id: deviceId
             };
+            
+            console.log('Dados enviados para login:', loginData);
+            console.log('========================');
             
             fetch('/motoboys/login/', {
                 method: 'POST',

@@ -357,7 +357,7 @@ def create_order(request):
             }, status=500)
     
     context = {
-        'cart_items': cart_items,
+        'cart_items': json.dumps(cart_items),  # Converte para JSON string
         'cart_total': subtotal,  # Apenas o subtotal
         'delivery_fee': 5.00,
         'total': cart_total

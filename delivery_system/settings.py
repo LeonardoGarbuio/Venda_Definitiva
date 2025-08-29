@@ -21,10 +21,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-$ekk7+r06kh%b6-^2qm8juzce-xpx66a88$v-)$i+k(kx%m^qk'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-$ekk7+r06kh%b6-^2qm8juzce-xpx66a88$v-)$i+k(kx%m^qk')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'venda-definitiva.onrender.com', '.onrender.com']
 
@@ -56,6 +56,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# Adiciona WhiteNoise apenas em produção
+# if not DEBUG:
+#     MIDDLEWARE.insert(2, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
 ROOT_URLCONF = 'delivery_system.urls'
 
@@ -128,6 +132,10 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
+# Configuração do WhiteNoise para servir arquivos estáticos (apenas em produção)
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -150,7 +158,11 @@ REST_FRAMEWORK = {
 }
 
 # CORS
-CORS_ALLOW_ALL_ORIGINS = True  # Apenas para desenvolvimento
+CORS_ALLOW_ALL_ORIGINS = False  # Desabilitado em produção
+CORS_ALLOWED_ORIGINS = [
+    "https://venda-definitiva.onrender.com",
+    "https://*.onrender.com",
+]
 
 # Login URLs
 LOGIN_URL = '/login/'

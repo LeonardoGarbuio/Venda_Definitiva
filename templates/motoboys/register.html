@@ -788,8 +788,15 @@
                 vehicle_model: formData.get('bikeModel'),
                 vehicle_plate: formData.get('licensePlate'),
                 vehicle_year: formData.get('bikeYear'),
-                vehicle_color: formData.get('bikeColor')
+                vehicle_color: formData.get('bikeColor'),
+                device_id: formData.get('device_id')  // Adicionando device_id
             };
+            
+            // DEBUG: Verificar se device_id está sendo enviado
+            console.log('📤 DADOS DO CADASTRO:');
+            console.log('📤 Device ID do formulário:', formData.get('device_id'));
+            console.log('📤 Device ID do localStorage:', localStorage.getItem('device_id'));
+            console.log('📤 Dados completos:', registrationData);
             
             // Send registration request
             fetch('/motoboys/register/', {
@@ -939,6 +946,40 @@
             }, 4000);
         }
 
+        // Função para gerar device_id (copiada do motoboy-nav.js)
+        function generateDeviceIdForRegistration() {
+            console.log('🔧 GERANDO DEVICE_ID APENAS PARA CADASTRO...');
+            
+            // Coleta informações do dispositivo
+            const userAgent = navigator.userAgent;
+            const language = navigator.language;
+            const platform = navigator.platform;
+            const screenRes = `${screen.width}x${screen.height}`;
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            
+            // Cria string única do dispositivo
+            const deviceString = `${userAgent}|${language}|${platform}|${screenRes}|${timezone}`;
+            console.log('🔧 Device string:', deviceString);
+            
+            // Gera hash simples
+            let hash = 0;
+            for (let i = 0; i < deviceString.length; i++) {
+                const char = deviceString.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Converte para 32-bit integer
+            }
+            
+            // Converte para string hexadecimal de 8 caracteres
+            const deviceId = Math.abs(hash).toString(16).substring(0, 8);
+            console.log('🔧 Device ID gerado para cadastro:', deviceId);
+            
+            // Salva no localStorage
+            localStorage.setItem('device_id', deviceId);
+            console.log('🔧 Device ID salvo no localStorage:', deviceId);
+            
+            return deviceId;
+        }
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             loadFormProgress();
@@ -948,9 +989,16 @@
             // Preenche o device_id
             const deviceIdField = document.getElementById('deviceIdField');
             if (deviceIdField) {
-                const savedDeviceId = localStorage.getItem('moto_device_id');
+                let savedDeviceId = localStorage.getItem('device_id');
                 if (savedDeviceId) {
                     deviceIdField.value = savedDeviceId;
+                    console.log('🔧 DEVICE_ID PREENCHIDO NO FORMULÁRIO:', savedDeviceId);
+                } else {
+                    // Gera um novo device_id se não existir
+                    console.log('🔧 GERANDO NOVO DEVICE_ID PARA CADASTRO...');
+                    savedDeviceId = generateDeviceIdForRegistration();
+                    deviceIdField.value = savedDeviceId;
+                    console.log('🔧 NOVO DEVICE_ID GERADO E PREENCHIDO:', savedDeviceId);
                 }
             }
             

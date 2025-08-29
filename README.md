@@ -1,191 +1,99 @@
-# 🚀 Sistema de Delivery - MotoDelivery
+# 🚀 MotoDelivery - Sistema de Delivery
 
-Sistema completo de delivery com área administrativa, cadastro de motoboys e interface para clientes fazerem pedidos.
+Sistema completo de delivery com cadastro de motoboys, pedidos e gestão administrativa.
 
-## ✨ Funcionalidades
+## 🛠️ Tecnologias
 
-### 🏠 **Página Inicial (Menu)**
-- Cardápio com categorias de produtos
-- Carrinho de compras
-- Navegação para cadastro de motoboy e área admin
+- **Backend:** Django 5.2.5
+- **Frontend:** HTML, CSS, JavaScript
+- **Banco de Dados:** SQLite (desenvolvimento) / PostgreSQL (produção)
+- **Deploy:** Render
 
-### 👨‍💼 **Área Administrativa**
-- Dashboard com estatísticas completas
-- Gerenciamento de motoboys
-- Controle de pedidos
-- Relatórios e gráficos
-- Estatísticas de performance
+## 🚀 Deploy no Render
 
-### 🛵 **Área do Motoboy**
-- Cadastro completo com validações
-- Dashboard com mapa e localização
-- Lista de pedidos disponíveis
-- Aceitar/recusar pedidos
-- Atualizar status de entregas
-- Perfil e configurações
+### 1. Configuração Automática
 
-### 👤 **Área do Cliente**
-- Fazer pedidos diretamente
-- Informações básicas para entrega
-- Acompanhamento de pedidos
-- Avaliação e feedback
+O projeto já está configurado para deploy automático no Render:
 
-## 🛠️ **Tecnologias**
+1. **Fork/Clone** este repositório
+2. **Conecte** ao Render
+3. **Configure** as variáveis de ambiente:
+   - `SECRET_KEY`: Gerada automaticamente
+   - `DEBUG`: `false`
+   - `ALLOWED_HOSTS`: `venda-definitiva.onrender.com`
 
-- **Backend**: Django 5.2.5
-- **Frontend**: HTML + CSS (Tailwind CSS)
-- **Banco de Dados**: SQLite
-- **Autenticação**: Sistema customizado do Django
-- **APIs**: Django REST Framework
+### 2. Variáveis de Ambiente
 
-## 🚀 **Como Executar**
-
-### 1. **Instalação**
 ```bash
-# Clone o repositório
-git clone <url-do-repositorio>
-cd venda_definitiva
+SECRET_KEY=sua_chave_secreta_aqui
+DEBUG=false
+ALLOWED_HOSTS=venda-definitiva.onrender.com
+```
 
-# Crie o ambiente virtual
-python -m venv venv
+### 3. Comandos de Build
 
-# Ative o ambiente virtual
-# Windows:
-venv\Scripts\Activate.ps1
-# Linux/Mac:
-source venv/bin/activate
-
-# Instale as dependências
+O Render executará automaticamente:
+```bash
 pip install -r requirements.txt
+bash start.sh
 ```
 
-### 2. **Configuração**
-```bash
-# Faça as migrações
-python manage.py makemigrations
-python manage.py migrate
-
-# Crie um superusuário (opcional)
-python manage.py createsuperuser
-```
-
-### 3. **Executar**
-```bash
-# Inicie o servidor
-python manage.py runserver
-
-# Acesse: http://127.0.0.1:8000/
-```
-
-## 📁 **Estrutura do Projeto**
+## 📁 Estrutura do Projeto
 
 ```
-venda_definitiva/
-├── delivery_system/          # Configurações principais
-├── core/                     # App principal e estatísticas
-├── users/                    # Gerenciamento de usuários
-├── motoboys/                 # Sistema de motoboys
-├── orders/                   # Sistema de pedidos
-├── templates/                # Templates HTML
-│   ├── core/                 # Templates principais
-│   ├── users/                # Templates de usuários
-│   ├── motoboys/             # Templates de motoboys
-│   └── orders/               # Templates de pedidos
-├── static/                   # Arquivos estáticos
-│   ├── css/                  # Estilos CSS
-│   ├── js/                   # JavaScript
-│   └── images/               # Imagens
-└── manage.py                 # Script de gerenciamento Django
+├── core/                 # App principal (produtos, categorias)
+├── users/               # Gestão de usuários
+├── motoboys/            # Sistema de motoboys
+├── orders/              # Sistema de pedidos
+├── static/              # Arquivos estáticos
+├── templates/           # Templates HTML
+├── delivery_system/     # Configurações Django
+├── requirements.txt     # Dependências Python
+├── start.sh            # Script de inicialização
+├── setup_render.py     # Setup automático
+└── render.yaml         # Configuração Render
 ```
 
-## 🔐 **Acessos**
+## 🔧 Funcionalidades
 
-### **Admin**
-- URL: `/admin/`
-- Usuário: Criar via `createsuperuser`
-- Funcionalidades: Gerenciamento completo do sistema
+### 👥 Sistema de Motoboys
+- ✅ Cadastro com device_id único
+- ✅ Login/Logout
+- ✅ Dashboard do motoboy
+- ✅ Identificação automática de dispositivo
 
-### **Motoboy**
-- URL: `/motoboys/register/`
-- Funcionalidades: Cadastro e dashboard
+### 🛒 Sistema de Pedidos
+- ✅ Carrinho de compras
+- ✅ Checkout completo
+- ✅ Cálculo de taxa de entrega
+- ✅ Resumo do pedido
 
-### **Cliente**
-- URL: `/` (página inicial)
-- Funcionalidades: Fazer pedidos
+### 🏪 Gestão Administrativa
+- ✅ Dashboard admin
+- ✅ Gestão de produtos
+- ✅ Gestão de pedidos
+- ✅ Gestão de motoboys
 
-## 📊 **Funcionalidades Administrativas**
+## 🚀 Como Usar
 
-### **Dashboard Principal**
-- Estatísticas em tempo real
-- Gráficos de performance
-- Resumo de pedidos e motoboys
+1. **Acesse** a aplicação
+2. **Navegue** pelo cardápio
+3. **Adicione** itens ao carrinho
+4. **Finalize** o pedido
+5. **Cadastre-se** como motoboy (se necessário)
+6. **Acesse** o painel administrativo
 
-### **Gerenciamento de Motoboys**
-- Cadastro com validações
-- Controle de status (online/offline)
-- Performance individual
-- Relatórios mensais
+## 🔒 Segurança
 
-### **Controle de Pedidos**
-- Visualização de todos os pedidos
-- Filtros por status e prioridade
-- Atualização de status
-- Cálculo automático de preços
+- ✅ CSRF Protection
+- ✅ CORS configurado
+- ✅ WhiteNoise para arquivos estáticos
+- ✅ Variáveis de ambiente seguras
 
-### **Relatórios**
-- Estatísticas diárias
-- Performance dos motoboys
-- Receita e satisfação do cliente
-- Geração automática de relatórios
+## 📞 Suporte
 
-## 🗺️ **Fluxo do Sistema**
-
-1. **Cliente acessa** a página inicial (menu)
-2. **Faz pedido** com informações básicas
-3. **Sistema calcula** preço e distância
-4. **Motoboy disponível** aceita o pedido
-5. **Acompanhamento** em tempo real
-6. **Entrega** e avaliação
-7. **Relatórios** automáticos para admin
-
-## 🔧 **Configurações**
-
-### **Variáveis de Ambiente**
-- `DEBUG`: True (desenvolvimento)
-- `SECRET_KEY`: Chave secreta do Django
-- `DATABASE_URL`: Configuração do banco
-- `ALLOWED_HOSTS`: Hosts permitidos
-
-### **Banco de Dados**
-- **Desenvolvimento**: SQLite
-- **Produção**: PostgreSQL/MySQL recomendado
-
-## 📱 **Responsividade**
-
-- Design responsivo para mobile
-- Interface otimizada para motoboys
-- Dashboard administrativo adaptável
-
-## 🚀 **Deploy**
-
-### **Recomendações para Produção**
-- Usar PostgreSQL ou MySQL
-- Configurar HTTPS
-- Usar servidor WSGI (Gunicorn)
-- Configurar CDN para arquivos estáticos
-- Implementar backup automático
-
-## 📞 **Suporte**
-
-Para dúvidas ou problemas:
-- Verificar logs do Django
-- Consultar documentação oficial
-- Verificar configurações do banco
-
-## 📄 **Licença**
-
-Este projeto é desenvolvido para fins educacionais e comerciais.
+Para dúvidas ou problemas, abra uma issue no repositório.
 
 ---
 
-**MotoDelivery** - Sistema completo de delivery desenvolvido com Django 🚀
+**MotoDelivery** - Sistema completo de delivery! 🚀
