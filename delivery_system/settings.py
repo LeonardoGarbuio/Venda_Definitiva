@@ -58,8 +58,8 @@ MIDDLEWARE = [
 ]
 
 # Adiciona WhiteNoise apenas em produção
-# if not DEBUG:
-#     MIDDLEWARE.insert(2, 'whitenoise.middleware.WhiteNoiseMiddleware')
+if not DEBUG:
+    MIDDLEWARE.insert(2, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
 ROOT_URLCONF = 'delivery_system.urls'
 
