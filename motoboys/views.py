@@ -11,11 +11,16 @@ from .models import Motoboy
 from orders.models import Order
 from users.models import User
 import json
+import hashlib
+import base64
+from django.utils import timezone
+from datetime import timedelta
+
 
 def motoboy_login(request):
     """View para login de motoboys com redirecionamento automático"""
     # Se o usuário já está logado e é um motoboy, redireciona para o dashboard
-    if request.user.is_authenticated:
+    if hasattr(request, 'user') and request.user.is_authenticated:
         try:
             motoboy = Motoboy.objects.get(user=request.user)
             return redirect('motoboys:dashboard')
@@ -28,7 +33,6 @@ def motoboy_login(request):
         try:
             # Decodifica o token e verifica se é válido
             import base64
-            import json
             from django.utils import timezone
             from datetime import timedelta
             
@@ -120,7 +124,6 @@ def motoboy_login(request):
                     if remember_me:
                         # Cria token de "lembrar dispositivo" (30 dias)
                         import base64
-                        import json
                         from django.utils import timezone
                         from datetime import timedelta
                         
@@ -156,9 +159,6 @@ def motoboy_login(request):
             }, status=500)
     
     return render(request, 'motoboys/login.html')
-
-import hashlib
-import json
 
 def check_device_status(request):
     """Verifica o status do dispositivo usando identificadores únicos como grandes empresas"""
