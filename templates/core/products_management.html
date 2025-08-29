@@ -1,0 +1,696 @@
+{% extends 'base.html' %}
+
+{% block title %}Gerenciamento de Produtos - MotoDelivery{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+<style>
+    .product-card {
+        transition: all 0.3s ease;
+    }
+    .product-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .status-available {
+        background-color: #dcfce7;
+        color: #166534;
+    }
+    .status-unavailable {
+        background-color: #fef2f2;
+        color: #dc2626;
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+        background-color: white;
+        margin: 5% auto;
+        padding: 0;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 600px;
+        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+    }
+    .modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .modal-body {
+        padding: 1.5rem;
+    }
+    .modal-footer {
+        padding: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Top Navigation -->
+<header class="bg-white shadow-subtle border-b border-gray-100 fixed top-0 left-0 right-0 z-40">
+    <div class="flex items-center justify-between h-16 px-4 lg:px-6">
+        <!-- Logo & Menu Toggle -->
+        <div class="flex items-center space-x-4">
+            <button onclick="toggleSidebar()" class="lg:hidden text-text-secondary hover:text-primary transition-colors duration-200">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <div class="flex items-center space-x-3">
+                <div class="bg-primary text-white p-2 rounded-lg">
+                    <i class="fas fa-utensils text-xl"></i>
+                </div>
+                <div class="hidden sm:block">
+                    <h1 class="text-xl font-heading font-bold text-secondary">MotoDelivery</h1>
+                    <p class="text-xs text-text-secondary">Painel Administrativo</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Navigation Actions -->
+        <div class="flex items-center space-x-4">
+            <!-- Notifications -->
+            <div class="relative">
+                <button class="text-text-secondary hover:text-primary transition-colors duration-200">
+                    <i class="fas fa-bell text-xl"></i>
+                    <span class="absolute -top-1 -right-1 bg-error text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                </button>
+            </div>
+            
+            <!-- User Menu -->
+            <div class="relative">
+                <button onclick="toggleUserMenu()" class="flex items-center space-x-2 text-text-secondary hover:text-primary transition-colors duration-200">
+                    <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <span class="hidden sm:block">Admin</span>
+                    <i class="fas fa-chevron-down text-sm"></i>
+                </button>
+                
+                <!-- User Dropdown -->
+                <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-50">
+                    <a href="/admin_dashboard/" class="block px-4 py-2 text-sm text-text-secondary hover:bg-gray-50">
+                        <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                    </a>
+                    <a href="/products/" class="block px-4 py-2 text-sm text-text-secondary hover:bg-gray-50">
+                        <i class="fas fa-utensils mr-2"></i>Produtos
+                    </a>
+                    <hr class="my-2">
+                    <a href="/logout/" class="block px-4 py-2 text-sm text-error hover:bg-gray-50">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Sair
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Sidebar -->
+<aside id="sidebar" class="fixed left-0 top-16 h-full w-64 bg-white shadow-subtle border-r border-gray-100 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-30">
+    <div class="p-4">
+        <!-- Navigation Links -->
+        <nav class="space-y-2">
+            <a href="/admin_dashboard/" class="flex items-center space-x-3 px-4 py-3 text-text-secondary hover:bg-gray-50 rounded-lg transition-colors duration-200">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="javascript:void(0)" class="flex items-center space-x-3 px-4 py-3 text-text-secondary hover:bg-gray-50 rounded-lg transition-colors duration-200">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Pedidos</span>
+            </a>
+            <a href="javascript:void(0)" class="flex items-center space-x-3 px-4 py-3 text-text-secondary hover:bg-gray-50 rounded-lg transition-colors duration-200">
+                <i class="fas fa-motorcycle"></i>
+                <span>Motoboys</span>
+            </a>
+            <a href="/products/" class="flex items-center space-x-3 px-4 py-3 bg-primary text-white rounded-lg">
+                <i class="fas fa-utensils"></i>
+                <span>Gerenciar Produtos</span>
+            </a>
+            <a href="/" class="flex items-center space-x-3 px-4 py-3 text-text-secondary hover:bg-gray-50 rounded-lg transition-colors duration-200">
+                <i class="fas fa-eye"></i>
+                <span>Ver Cardápio</span>
+            </a>
+            <a href="javascript:void(0)" class="flex items-center space-x-3 px-4 py-3 text-text-secondary hover:bg-gray-50 rounded-lg transition-colors duration-200">
+                <i class="fas fa-chart-line"></i>
+                <span>Relatórios</span>
+            </a>
+            <a href="javascript:void(0)" class="flex items-center space-x-3 px-4 py-3 text-text-secondary hover:bg-gray-50 rounded-lg transition-colors duration-200">
+                <i class="fas fa-cog"></i>
+                <span>Configurações</span>
+            </a>
+        </nav>
+        
+        <!-- Quick Actions -->
+        <div class="mt-8 pt-6 border-t border-gray-100">
+            <h3 class="text-sm font-semibold text-text-secondary mb-3">Ações Rápidas</h3>
+            <div class="space-y-2">
+                <button onclick="openCreateModal()" class="w-full btn-primary text-sm py-2">
+                    <i class="fas fa-plus mr-2"></i>Novo Produto
+                </button>
+                <button onclick="goToDashboard()" class="w-full btn-secondary text-sm py-2">
+                    <i class="fas fa-arrow-left mr-2"></i>Voltar ao Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<!-- Overlay for mobile -->
+<div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden hidden" onclick="toggleSidebar()"></div>
+
+<!-- Main Content -->
+<main class="lg:ml-64 pt-16 pb-8 px-4 lg:px-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header Section -->
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-3xl font-heading font-bold text-secondary mb-2">Gerenciamento de Produtos</h1>
+                    <p class="text-text-secondary">Cadastre, edite e gerencie todos os produtos do seu cardápio</p>
+                </div>
+                <button onclick="openCreateModal()" class="btn-primary mt-4 sm:mt-0">
+                    <i class="fas fa-plus mr-2"></i>Novo Produto
+                </button>
+            </div>
+        </div>
+
+        <!-- Filters and Search -->
+        <div class="bg-white rounded-lg shadow-subtle p-4 mb-6">
+            <div class="flex flex-col sm:flex-row gap-4">
+                <div class="flex-1">
+                    <input type="text" id="searchInput" placeholder="Buscar produtos..." class="form-input w-full" oninput="filterProducts()">
+                </div>
+                <div class="flex gap-2">
+                    <select id="categoryFilter" class="form-select" onchange="filterProducts()">
+                        <option value="">Todas as categorias</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <select id="statusFilter" class="form-select" onchange="filterProducts()">
+                        <option value="">Todos os status</option>
+                        <option value="true">Disponível</option>
+                        <option value="false">Indisponível</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {% for product in products %}
+            <div class="product-card bg-white rounded-lg shadow-subtle overflow-hidden" data-product-id="{{ product.id }}" data-category="{{ product.category.id }}" data-available="{{ product.is_available|lower }}">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1584824486509-112e4181ff6b?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                         alt="{{ product.name }}" 
+                         class="w-full h-48 object-cover">
+                    
+                    <!-- Status Badge -->
+                    <div class="absolute top-2 right-2">
+                        <span class="status-badge {% if product.is_available %}status-available{% else %}status-unavailable{% endif %}">
+                            {% if product.is_available %}Disponível{% else %}Indisponível{% endif %}
+                        </span>
+                    </div>
+
+                    <!-- Category Badge -->
+                    <div class="absolute top-2 left-2">
+                        <span class="bg-primary text-white px-2 py-1 rounded-full text-xs font-semibold">
+                            {{ product.category.name }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="p-4">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-heading font-bold text-secondary text-lg">{{ product.name }}</h3>
+                        <span class="font-bold text-primary text-lg">R$ {{ product.price|floatformat:2 }}</span>
+                    </div>
+                    
+                    <p class="text-text-secondary text-sm mb-4 line-clamp-2">{{ product.description }}</p>
+                    
+                    <div class="flex items-center justify-between text-xs text-text-secondary mb-4">
+                        <span>Ordem: {{ product.order }}</span>
+                        <span>ID: #{{ product.id }}</span>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex gap-2">
+                        <button onclick="editProduct({{ product.id }})" class="flex-1 btn-secondary text-sm py-2">
+                            <i class="fas fa-edit mr-1"></i>Editar
+                        </button>
+                        <button onclick="toggleAvailability({{ product.id }})" class="btn-accent text-sm py-2 px-3">
+                            <i class="fas fa-toggle-on mr-1"></i>
+                        </button>
+                        <button onclick="deleteProduct({{ product.id }})" class="btn-error text-sm py-2 px-3">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-12 text-gray-500">
+                <i class="fas fa-utensils text-4xl mb-4"></i>
+                <p class="text-lg">Nenhum produto cadastrado</p>
+                <p class="text-sm">Clique em "Novo Produto" para começar</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</main>
+
+<!-- Create/Edit Product Modal -->
+<div id="productModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle" class="text-xl font-heading font-bold text-secondary">Novo Produto</h3>
+            <button onclick="closeModal()" class="text-text-secondary hover:text-primary">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        
+        <form id="productForm" class="modal-body">
+            <input type="hidden" id="productId" name="product_id">
+            <input type="hidden" id="actionType" name="action" value="create">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="productName" class="block text-sm font-semibold text-secondary mb-2">
+                        <i class="fas fa-tag mr-2 text-primary"></i>Nome do Produto
+                    </label>
+                    <input type="text" id="productName" name="name" required class="form-input w-full" placeholder="Ex: Hambúrguer Clássico">
+                </div>
+                
+                <div>
+                    <label for="productPrice" class="block text-sm font-semibold text-secondary mb-2">
+                        <i class="fas fa-dollar-sign mr-2 text-primary"></i>Preço
+                    </label>
+                    <input type="number" id="productPrice" name="price" step="0.01" min="0" required class="form-input w-full" placeholder="0.00">
+                </div>
+                
+                <div>
+                    <label for="productCategory" class="block text-sm font-semibold text-secondary mb-2">
+                        <i class="fas fa-list mr-2 text-primary"></i>Categoria
+                    </label>
+                    <select id="productCategory" name="category_id" required class="form-select w-full">
+                        <option value="">Selecione uma categoria</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="productOrder" class="block text-sm font-semibold text-secondary mb-2">
+                        <i class="fas fa-sort-numeric-up mr-2 text-primary"></i>Ordem
+                    </label>
+                    <input type="number" id="productOrder" name="order" min="0" class="form-input w-full" placeholder="0">
+                </div>
+                
+                <div class="md:col-span-2">
+                    <label for="productDescription" class="block text-sm font-semibold text-secondary mb-2">
+                        <i class="fas fa-align-left mr-2 text-primary"></i>Descrição
+                    </label>
+                    <textarea id="productDescription" name="description" rows="3" required class="form-input w-full" placeholder="Descreva o produto..."></textarea>
+                </div>
+                
+                <div class="md:col-span-2">
+                    <label class="flex items-center">
+                        <input type="checkbox" id="productAvailable" name="is_available" class="form-checkbox mr-2" checked>
+                        <span class="text-sm font-semibold text-secondary">Produto disponível</span>
+                    </label>
+                </div>
+            </div>
+        </form>
+        
+        <div class="modal-footer">
+            <button onclick="closeModal()" class="btn-secondary">Cancelar</button>
+            <button onclick="saveProduct()" class="btn-primary">
+                <i class="fas fa-save mr-2"></i>Salvar Produto
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="text-xl font-heading font-bold text-error">Confirmar Exclusão</h3>
+            <button onclick="closeDeleteModal()" class="text-text-secondary hover:text-primary">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <p class="text-text-secondary mb-4">Tem certeza que deseja excluir o produto <strong id="deleteProductName"></strong>?</p>
+            <p class="text-sm text-text-secondary">Esta ação não pode ser desfeita.</p>
+        </div>
+        
+        <div class="modal-footer">
+            <button onclick="closeDeleteModal()" class="btn-secondary">Cancelar</button>
+            <button onclick="confirmDelete()" class="btn-error">
+                <i class="fas fa-trash mr-2"></i>Excluir
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block motoboy_scripts %}
+<!-- Scripts específicos para gerenciamento de produtos -->
+<script>
+let currentProductId = null;
+let deleteProductId = null;
+
+// Navigation
+function goBack() {
+    window.location.href = '/admin_dashboard/';
+}
+
+function goToDashboard() {
+    window.location.href = '/admin_dashboard/';
+}
+
+// Sidebar functions
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    
+    if (sidebar.classList.contains('-translate-x-full')) {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+    } else {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+    }
+}
+
+function toggleUserMenu() {
+    const userMenu = document.getElementById('userMenu');
+    userMenu.classList.toggle('hidden');
+}
+
+// Close user menu when clicking outside
+document.addEventListener('click', function(event) {
+    const userMenu = document.getElementById('userMenu');
+    const userButton = event.target.closest('button[onclick="toggleUserMenu()"]');
+    
+    if (!userButton && !userMenu.contains(event.target)) {
+        userMenu.classList.add('hidden');
+    }
+});
+
+// Modal functions
+function openCreateModal() {
+    document.getElementById('modalTitle').textContent = 'Novo Produto';
+    document.getElementById('actionType').value = 'create';
+    document.getElementById('productForm').reset();
+    document.getElementById('productId').value = '';
+    document.getElementById('productModal').style.display = 'block';
+}
+
+function editProduct(productId) {
+    openEditModal(productId);
+}
+
+function openEditModal(productId) {
+    // Buscar dados do produto
+    const productCard = document.querySelector(`[data-product-id="${productId}"]`);
+    const name = productCard.querySelector('h3').textContent;
+    const price = productCard.querySelector('.text-primary').textContent.replace('R$ ', '');
+    const description = productCard.querySelector('.text-text-secondary').textContent;
+    const category = productCard.querySelector('.bg-primary').textContent;
+    const available = productCard.querySelector('.status-badge').classList.contains('status-available');
+    const order = productCard.querySelector('.text-xs').textContent.replace('Ordem: ', '');
+    
+    // Preencher formulário
+    document.getElementById('modalTitle').textContent = 'Editar Produto';
+    document.getElementById('actionType').value = 'update';
+    document.getElementById('productId').value = productId;
+    document.getElementById('productName').value = name;
+    document.getElementById('productPrice').value = price;
+    document.getElementById('productDescription').value = description;
+    document.getElementById('productOrder').value = order;
+    document.getElementById('productAvailable').checked = available;
+    
+    // Selecionar categoria
+    const categorySelect = document.getElementById('productCategory');
+    for (let option of categorySelect.options) {
+        if (option.textContent === category) {
+            option.selected = true;
+            break;
+        }
+    }
+    
+    document.getElementById('productModal').style.display = 'block';
+}
+
+function closeModal() {
+    document.getElementById('productModal').style.display = 'none';
+}
+
+function openDeleteModal(productId) {
+    const productCard = document.querySelector(`[data-product-id="${productId}"]`);
+    const name = productCard.querySelector('h3').textContent;
+    
+    document.getElementById('deleteProductName').textContent = name;
+    deleteProductId = productId;
+    document.getElementById('deleteModal').style.display = 'block';
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+    deleteProductId = null;
+}
+
+// CRUD operations
+function saveProduct() {
+    const form = document.getElementById('productForm');
+    const formData = new FormData(form);
+    
+    const data = {
+        action: formData.get('action'),
+        name: formData.get('name'),
+        description: formData.get('description'),
+        price: formData.get('price'),
+        category_id: formData.get('category_id'),
+        is_available: formData.get('is_available') === 'on',
+        order: formData.get('order') || 0
+    };
+    
+    if (formData.get('action') === 'update') {
+        data.product_id = formData.get('product_id');
+    }
+    
+    fetch('/products/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+            closeModal();
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            showNotification(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        showNotification('Erro ao salvar produto', 'error');
+    });
+}
+
+function toggleAvailability(productId) {
+    fetch('/products/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            action: 'toggle_availability',
+            product_id: productId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            showNotification(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        showNotification('Erro ao alterar disponibilidade', 'error');
+    });
+}
+
+function deleteProduct(productId) {
+    openDeleteModal(productId);
+}
+
+function confirmDelete() {
+    if (!deleteProductId) return;
+    
+    fetch('/products/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            action: 'delete',
+            product_id: deleteProductId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+            closeDeleteModal();
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            showNotification(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        showNotification('Erro ao deletar produto', 'error');
+    });
+}
+
+// Filter functions
+function filterProducts() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const categoryFilter = document.getElementById('categoryFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    const products = document.querySelectorAll('.product-card');
+    
+    products.forEach(product => {
+        const name = product.querySelector('h3').textContent.toLowerCase();
+        const description = product.querySelector('.text-text-secondary').textContent.toLowerCase();
+        const category = product.dataset.category;
+        const available = product.dataset.available;
+        
+        let show = true;
+        
+        // Search filter
+        if (searchTerm && !name.includes(searchTerm) && !description.includes(searchTerm)) {
+            show = false;
+        }
+        
+        // Category filter
+        if (categoryFilter && category !== categoryFilter) {
+            show = false;
+        }
+        
+        // Status filter
+        if (statusFilter && available !== statusFilter) {
+            show = false;
+        }
+        
+        product.style.display = show ? 'block' : 'none';
+    });
+}
+
+// Utility functions
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
+    
+    if (type === 'success') {
+        notification.classList.add('bg-success-100', 'text-success-800', 'border', 'border-success-200');
+        notification.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${message}`;
+    } else {
+        notification.classList.add('bg-error-100', 'text-error-800', 'border', 'border-error-200');
+        notification.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i>${message}`;
+    }
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.remove('translate-x-full');
+    }, 100);
+    
+    setTimeout(() => {
+        notification.classList.add('translate-x-full');
+        setTimeout(() => {
+            if (document.body.contains(notification)) {
+                document.body.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Close modals when clicking outside
+window.onclick = function(event) {
+    const productModal = document.getElementById('productModal');
+    const deleteModal = document.getElementById('deleteModal');
+    
+    if (event.target === productModal) {
+        closeModal();
+    }
+    if (event.target === deleteModal) {
+        closeDeleteModal();
+    }
+}
+
+// Close modals with Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeModal();
+        closeDeleteModal();
+    }
+});
+</script>
+{% endblock %}

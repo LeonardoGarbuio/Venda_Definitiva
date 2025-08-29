@@ -246,6 +246,12 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // Salvar sessão no localStorage
+                    if (data.session_data) {
+                        localStorage.setItem('adminSession', JSON.stringify(data.session_data));
+                        console.log('✅ Sessão salva no localStorage:', data.session_data);
+                    }
+                    
                     // Show success message
                     showNotification('Login realizado com sucesso!', 'success');
                     

@@ -2,6 +2,27 @@ from django.contrib import admin
 from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from users.models import User
+from django.contrib.admin import AdminSite
+from django.utils.translation import gettext_lazy as _
+
+# Configuração personalizada do admin
+class MotoDeliveryAdminSite(AdminSite):
+    site_header = _('MotoDelivery Admin')
+    site_title = _('MotoDelivery Admin Portal')
+    index_title = _('Bem-vindo ao Portal Administrativo')
+    
+    # Desabilita o sistema de motoboy no admin
+    def has_permission(self, request):
+        # Se for admin, permite acesso
+        if request.user.is_superuser:
+            return True
+        # Se for staff, permite acesso
+        if request.user.is_staff:
+            return True
+        return False
+
+# Instância personalizada do admin
+admin_site = MotoDeliveryAdminSite(name='motodelivery_admin')
 
 # Configurações do admin
 admin.site.site_header = "Sistema de Delivery - Administração"
