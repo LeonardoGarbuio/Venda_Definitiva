@@ -80,6 +80,7 @@
 
                 <!-- Multi-Step Form -->
                 <form id="registrationForm" class="space-y-8" onsubmit="handleRegistration(event)">
+                    {% csrf_token %}
                     <!-- Hidden field para device_id -->
                     <input type="hidden" id="deviceIdField" name="device_id" />
                     <!-- Step 1: Personal Information -->

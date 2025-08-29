@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-$ekk7+r06kh%b6-^2qm8juzce-xpx66a88$v-)$i+k(kx%m^qk')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'venda-definitiva.onrender.com', '.onrender.com']
 
@@ -135,6 +135,9 @@ STATICFILES_DIRS = [
 # Configuração do WhiteNoise para servir arquivos estáticos (apenas em produção)
 if not DEBUG:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+else:
+    # Em desenvolvimento, usar o servidor de arquivos estáticos padrão do Django
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
