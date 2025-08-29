@@ -241,25 +241,57 @@ def remove_from_cart(request):
 
 def create_order(request):
     """View para criação de pedidos"""
-    # Obtém itens do carrinho
-    cart_items = get_cart_items(request)
-    cart_total = get_cart_total(request)
+    # GET request - mostra formulário de checkout
+    # Obtém dados do carrinho da URL
+    cart_data = request.GET.get('cart', '[]')
+    print(f"🔍 DEBUG: cart_data recebido: {cart_data}")
+    
+    try:
+        cart_items = json.loads(cart_data)
+        print(f"🔍 DEBUG: cart_items parseado: {cart_items}")
+    except Exception as e:
+        print(f"❌ DEBUG: Erro ao fazer parse: {e}")
+        cart_items = []
+    
+    # Calcula total
+    cart_total = 0
+    subtotal = 0
+    if cart_items:
+        subtotal = sum(float(item['price']) * int(item['quantity']) for item in cart_items)
+        delivery_fee = 5.00
+        cart_total = subtotal + delivery_fee
+        print(f"🔍 DEBUG: Subtotal: {subtotal}, Total: {cart_total}")
     
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
+            print(f"🔍 DEBUG POST: Dados recebidos: {data}")
             
-            # Validações básicas
-            required_fields = ['pickup_address', 'delivery_address', 'description', 'base_price', 'customer_name', 'customer_email', 'customer_phone']
+            # Obtém itens do carrinho do POST
+            cart_data = data.get('cart_items', [])
+            print(f"🔍 DEBUG POST: cart_items: {cart_data}")
             
-            if not all(data.get(field) for field in required_fields):
+            if not cart_data:
+                print("❌ DEBUG POST: Carrinho vazio no POST")
                 return JsonResponse({
                     'success': False,
-                    'message': 'Todos os campos obrigatórios devem ser preenchidos'
+                    'message': 'Carrinho vazio'
+                }, status=400)
+            
+            # Validações básicas
+            required_fields = ['delivery_address', 'customer_name', 'customer_email', 'customer_phone']
+            print(f"🔍 DEBUG POST: Campos obrigatórios: {required_fields}")
+            
+            missing_fields = [field for field in required_fields if not data.get(field)]
+            if missing_fields:
+                print(f"❌ DEBUG POST: Campos faltando: {missing_fields}")
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Campos obrigatórios faltando: {", ".join(missing_fields)}'
                 }, status=400)
             
             # Verifica se há itens no carrinho
-            if not cart_items.exists():
+            if not cart_data:
                 return JsonResponse({
                     'success': False,
                     'message': 'Carrinho vazio'
@@ -278,47 +310,46 @@ def create_order(request):
                 }
             )
             
+            # Calcula total do carrinho
+            subtotal = sum(float(item['price']) * int(item['quantity']) for item in cart_data)
+            delivery_fee = 5.00  # Taxa fixa por enquanto
+            total = subtotal + delivery_fee
+            
             # Cria o pedido
             order = Order.objects.create(
                 customer=customer,
-                pickup_address=data['pickup_address'],
-                pickup_latitude=data.get('pickup_latitude'),
-                pickup_longitude=data.get('pickup_longitude'),
+                pickup_address="Restaurante MotoDelivery",  # Endereço fixo
                 delivery_address=data['delivery_address'],
-                delivery_latitude=data.get('delivery_latitude'),
-                delivery_longitude=data.get('delivery_longitude'),
-                description=data['description'],
-                weight=data.get('weight', 0.5),
-                dimensions=data.get('dimensions', 'Padrão'),
-                is_fragile=data.get('is_fragile', False),
-                priority=data.get('priority', 'normal'),
-                base_price=cart_total['total'],  # Usa o total do carrinho
-                distance_km=data.get('distance_km', 0)
+                description=f"Pedido com {len(cart_data)} itens",
+                weight=0.5,  # Peso padrão
+                dimensions='Padrão',
+                is_fragile=False,
+                priority='normal',
+                base_price=total,
+                distance_km=0  # Será calculado depois
             )
             
-            # Calcula preço final se houver distância
-            if order.distance_km and order.distance_km > 0:
-                order.calculate_final_price()
-            else:
-                # Se não há distância, o preço final é igual ao preço base
-                order.final_price = order.base_price
-                order.save(update_fields=['final_price'])
+            # Cria os itens do pedido
+            from core.models import Product
             
-            # Limpa o carrinho após criar o pedido
-            cart_items.delete()
+            for cart_item in cart_data:
+                try:
+                    product = Product.objects.get(id=cart_item['id'])
+                    # Aqui você criaria OrderItem se tivesse esse modelo
+                    # Por enquanto, vamos salvar os detalhes no description
+                    order.description += f"\n- {cart_item['name']} x{cart_item['quantity']} - R$ {cart_item['price']}"
+                except Product.DoesNotExist:
+                    # Se o produto não existir, salva apenas o nome
+                    order.description += f"\n- {cart_item['name']} x{cart_item['quantity']} - R$ {cart_item['price']}"
+            
+            order.save()
             
             return JsonResponse({
                 'success': True,
                 'message': 'Pedido criado com sucesso!',
-                'order_id': order.id,
-                'order_number': order.order_number
+                'order_id': order.id
             })
             
-        except json.JSONDecodeError:
-            return JsonResponse({
-                'success': False,
-                'message': 'Dados inválidos'
-            }, status=400)
         except Exception as e:
             return JsonResponse({
                 'success': False,
@@ -327,8 +358,11 @@ def create_order(request):
     
     context = {
         'cart_items': cart_items,
-        'cart_total': cart_total
+        'cart_total': subtotal,  # Apenas o subtotal
+        'delivery_fee': 5.00,
+        'total': cart_total
     }
+    print(f"🔍 DEBUG: Context enviado: {context}")
     return render(request, 'orders/create_order.html', context)
 
 @login_required

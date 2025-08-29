@@ -1,24 +1,24 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from orders.models import MenuItem
+from core.models import Category, Product
 import json
 
 def home(request):
     """Página inicial com cardápio"""
-    # Carrega itens do menu do banco de dados
-    menu_items = MenuItem.objects.filter(is_available=True).order_by('category', 'name')
+    # Carrega categorias e produtos do banco de dados
+    categories = Category.objects.filter(is_active=True).order_by('order', 'name')
+    products = Product.objects.filter(is_available=True).order_by('category__order', 'order', 'name')
     
-    # Agrupa por categoria
-    categories = {}
-    for item in menu_items:
-        if item.category not in categories:
-            categories[item.category] = []
-        categories[item.category].append(item)
+    # Agrupa produtos por categoria
+    menu_data = {}
+    for category in categories:
+        menu_data[category] = products.filter(category=category)
     
     context = {
         'categories': categories,
-        'menu_items': menu_items
+        'products': products,
+        'menu_data': menu_data
     }
     return render(request, 'core/home.html', context)
 

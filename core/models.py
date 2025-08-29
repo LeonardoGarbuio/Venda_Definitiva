@@ -215,3 +215,55 @@ class MotoboyPerformance(models.Model):
             performance.save()
         
         return performance
+
+class Category(models.Model):
+    """Modelo para categorias de produtos"""
+    
+    name = models.CharField(max_length=100, verbose_name="Nome")
+    description = models.TextField(blank=True, verbose_name="Descrição")
+    image = models.ImageField(upload_to='categories/', blank=True, null=True, verbose_name="Imagem")
+    is_active = models.BooleanField(default=True, verbose_name="Ativo")
+    order = models.PositiveIntegerField(default=0, verbose_name="Ordem")
+    
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Data de criação")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Data de atualização")
+    
+    class Meta:
+        verbose_name = "Categoria"
+        verbose_name_plural = "Categorias"
+        ordering = ['order', 'name']
+    
+    def __str__(self):
+        return self.name
+
+class Product(models.Model):
+    """Modelo para produtos do cardápio"""
+    
+    name = models.CharField(max_length=200, verbose_name="Nome")
+    description = models.TextField(verbose_name="Descrição")
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Preço")
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Categoria")
+    image = models.ImageField(upload_to='products/', blank=True, null=True, verbose_name="Imagem")
+    is_available = models.BooleanField(default=True, verbose_name="Disponível")
+    is_featured = models.BooleanField(default=False, verbose_name="Destaque")
+    order = models.PositiveIntegerField(default=0, verbose_name="Ordem")
+    
+    # Informações nutricionais (opcional)
+    calories = models.PositiveIntegerField(blank=True, null=True, verbose_name="Calorias")
+    preparation_time = models.PositiveIntegerField(blank=True, null=True, verbose_name="Tempo de preparo (minutos)")
+    
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Data de criação")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Data de atualização")
+    
+    class Meta:
+        verbose_name = "Produto"
+        verbose_name_plural = "Produtos"
+        ordering = ['category__order', 'order', 'name']
+    
+    def __str__(self):
+        return f"{self.name} - {self.category.name}"
+    
+    @property
+    def formatted_price(self):
+        """Retorna o preço formatado"""
+        return f"R$ {self.price:.2f}".replace('.', ',')

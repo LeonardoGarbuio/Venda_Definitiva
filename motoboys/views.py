@@ -55,7 +55,12 @@ def motoboy_login(request):
             password = data.get('password')
             remember_me = data.get('remember_me', False)
             device_id = data.get('device_id')  # Novo campo
-            print(f"Login attempt - Email: {email}, Device ID: {device_id}")
+            print(f"=== DEBUG LOGIN ===")
+            print(f"Email: {email}")
+            print(f"Device ID recebido: {device_id}")
+            print(f"Tipo do device_id: {type(device_id)}")
+            print(f"Dados completos: {data}")
+            print(f"==================")
             
             if not email or not password:
                 return JsonResponse({
@@ -74,18 +79,34 @@ def motoboy_login(request):
                     # Salva o device_id se fornecido
                     if device_id:
                         try:
+                            print(f"=== DEBUG SALVAR DEVICE_ID ===")
+                            print(f"Device ID a salvar: {device_id}")
+                            print(f"Tipo do device_id: {type(device_id)}")
+                            print(f"Device IDs atuais: {motoboy.device_ids}")
+                            print(f"Tipo dos device_ids: {type(motoboy.device_ids)}")
+                            
                             current_device_ids = motoboy.device_ids or []
+                            print(f"Lista atual: {current_device_ids}")
+                            print(f"Tipo da lista: {type(current_device_ids)}")
+                            
                             if device_id not in current_device_ids:
                                 current_device_ids.append(device_id)
+                                print(f"Nova lista: {current_device_ids}")
                                 motoboy.device_ids = current_device_ids
                                 motoboy.save()
-                                print(f"Device ID {device_id} salvo para motoboy {motoboy.full_name}")
-                                print(f"Device IDs atuais: {motoboy.device_ids}")
+                                print(f"✅ Device ID {device_id} salvo para motoboy {motoboy.full_name}")
+                                print(f"✅ Device IDs finais: {motoboy.device_ids}")
                             else:
-                                print(f"Device ID {device_id} já existe para motoboy {motoboy.full_name}")
+                                print(f"⚠️ Device ID {device_id} já existe para motoboy {motoboy.full_name}")
+                            print(f"===============================")
                         except Exception as e:
-                            print(f"Erro ao salvar device_id: {e}")
+                            print(f"❌ Erro ao salvar device_id: {e}")
+                            print(f"❌ Tipo do erro: {type(e)}")
+                            import traceback
+                            traceback.print_exc()
                             pass
+                    else:
+                        print(f"⚠️ Nenhum device_id fornecido para salvar")
                     
                     login(request, user)
                     
@@ -142,6 +163,9 @@ import json
 def check_device_status(request):
     """Verifica o status do dispositivo usando identificadores únicos como grandes empresas"""
     
+    print(f"=== DEBUG CHECK_DEVICE_STATUS ===")
+    print(f"Usuário autenticado: {request.user.is_authenticated}")
+    
     # 1. Verifica se há uma sessão ativa
     if request.user.is_authenticated:
         try:
@@ -154,27 +178,42 @@ def check_device_status(request):
                 'user_name': motoboy.user.first_name or motoboy.user.username
             })
         except Motoboy.DoesNotExist:
+            print("Usuário logado mas não é motoboy")
             pass
     
-    # 2. Gera um ID único da máquina baseado em múltiplos fatores
-    device_id = generate_device_id(request)
-    print(f"Device ID gerado: {device_id}")
+    # 2. Tenta obter o device_id do frontend (localStorage)
+    device_id = request.GET.get('device_id')
+    print(f"Device ID recebido do frontend: {device_id}")
     
-    # 3. Verifica se já existe um cadastro para este dispositivo
-    existing_motoboy = check_existing_device_registration(device_id, request)
+    # 3. Se recebeu device_id, verifica se já existe cadastro
+    if device_id and device_id.strip():
+        print(f"🔍 VERIFICANDO DEVICE_ID EXISTENTE: {device_id}")
+        existing_motoboy = check_existing_device_registration(device_id, request)
+        
+        if existing_motoboy:
+            print(f"✅ Dispositivo já cadastrado para: {existing_motoboy.full_name}")
+            return JsonResponse({
+                'is_new_device': False,
+                'show_register': False,
+                'show_login': True,
+                'message': 'Dispositivo já cadastrado',
+                'device_id': device_id
+            })
+        else:
+            print(f"❌ Device_id não encontrado no banco, mas foi enviado pelo frontend")
+            print(f"❌ Isso indica um problema de sincronização")
     
-    if existing_motoboy:
-        print(f"Dispositivo já cadastrado para: {existing_motoboy.full_name}")
-        return JsonResponse({
-            'is_new_device': False,
-            'show_register': False,
-            'show_login': True,
-            'message': 'Dispositivo já cadastrado',
-            'device_id': device_id
-        })
+    # 4. Se não recebeu device_id ou não encontrou cadastro, gera um novo
+    if not device_id or not device_id.strip():
+        print(f"🆕 GERANDO NOVO DEVICE_ID (frontend não enviou ou enviou vazio)")
+        device_id = generate_device_id(request)
+        print(f"🆕 Novo Device ID gerado: {device_id}")
+    else:
+        print(f"🔄 REUTILIZANDO DEVICE_ID ENVIADO PELO FRONTEND: {device_id}")
     
-    # 4. Se não encontrou, mostra cadastro
-    print(f"Dispositivo novo, mostrando cadastro")
+    # 5. Mostra cadastro para dispositivo novo
+    print(f"📝 Dispositivo novo, mostrando cadastro")
+    print(f"=== FIM DEBUG ===")
     return JsonResponse({
         'is_new_device': True,
         'show_register': True,
@@ -185,6 +224,8 @@ def check_device_status(request):
 def generate_device_id(request):
     """Gera um ID único para o dispositivo baseado em múltiplos fatores"""
     
+    print(f"🚀 === INICIANDO GENERATE_DEVICE_ID ===")
+    
     # Coleta informações do dispositivo
     user_agent = request.META.get('HTTP_USER_AGENT', '')
     accept_language = request.META.get('HTTP_ACCEPT_LANGUAGE', '')
@@ -194,51 +235,126 @@ def generate_device_id(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
         ip = x_forwarded_for.split(',')[0]
+        print(f"🌐 IP detectado via X-Forwarded-For: {ip}")
     else:
         ip = request.META.get('REMOTE_ADDR', '')
+        print(f"🌐 IP direto: {ip}")
     
     # Informações adicionais para maior unicidade
     host = request.META.get('HTTP_HOST', '')
     referer = request.META.get('HTTP_REFERER', '')
     
+    print(f"📋 DADOS COLETADOS:")
+    print(f"  IP: {ip}")
+    print(f"  User-Agent: {user_agent[:100]}...")
+    print(f"  Accept-Language: {accept_language}")
+    print(f"  Accept-Encoding: {accept_encoding}")
+    print(f"  Host: {host}")
+    print(f"  Referer: {referer}")
+    
     # Cria um hash único baseado em múltiplos fatores
     device_string = f"{ip}|{user_agent}|{accept_language}|{accept_encoding}|{host}|{referer}"
+    
+    print(f"🔍 DEVICE STRING CRIADA:")
+    print(f"  String: {device_string[:200]}...")
+    print(f"  Tamanho: {len(device_string)}")
+    
+    # Gera o hash SHA256
+    import hashlib
     device_hash = hashlib.sha256(device_string.encode()).hexdigest()[:16]
     
-    print(f"Device string: {ip}|{user_agent[:50]}...|{accept_language}|{accept_encoding}|{host}")
-    print(f"Device hash: {device_hash}")
+    print(f"🔢 HASH GERADO:")
+    print(f"  Hash completo (SHA256): {hashlib.sha256(device_string.encode()).hexdigest()}")
+    print(f"  Hash truncado (16 chars): {device_hash}")
+    print(f"  Tamanho do hash: {len(device_hash)}")
     
+    print(f"🚀 === FIM GENERATE_DEVICE_ID ====")
     return device_hash
 
 def check_existing_device_registration(device_id, request):
     """Verifica se já existe um cadastro para este dispositivo"""
     
-    print(f"Verificando device_id: {device_id}")
+    print(f"🚀 === INICIANDO CHECK_EXISTING_DEVICE_REGISTRATION ===")
+    print(f"🔍 PARÂMETROS RECEBIDOS:")
+    print(f"  device_id: {device_id}")
+    print(f"  Tipo do device_id: {type(device_id)}")
+    print(f"  Tamanho: {len(device_id) if device_id else 0}")
+    print(f"  Request: {request}")
     
     # 1. Verifica se já existe um motoboy com este device_id
     try:
-        motoboy = Motoboy.objects.filter(device_ids__contains=device_id).first()
-        if motoboy:
-            print(f"Encontrou motoboy por device_id: {motoboy.full_name}")
-            print(f"Device IDs do motoboy: {motoboy.device_ids}")
-            return motoboy
-        else:
-            print(f"Nenhum motoboy encontrado com device_id: {device_id}")
+        print(f"🔍 INICIANDO BUSCA NO BANCO...")
+        
+        # SQLite não suporta contains em JSONField, vamos usar uma abordagem diferente
+        motoboys = Motoboy.objects.all()
+        total_motoboys = motoboys.count()
+        print(f"📊 TOTAL DE MOTOBOYS NO BANCO: {total_motoboys}")
+        
+        if total_motoboys == 0:
+            print(f"❌ NENHUM MOTOBOY NO BANCO!")
+            print(f"🚀 === FIM CHECK_EXISTING_DEVICE_REGISTRATION (BANCO VAZIO) ====")
+            return None
+        
+        print(f"🔍 VERIFICANDO CADA MOTOBOY...")
+        
+        for i, motoboy in enumerate(motoboys):
+            print(f"  📋 MOTOBOY {i+1}/{total_motoboys}:")
+            print(f"    Nome: {motoboy.full_name}")
+            print(f"    Email: {motoboy.user.email}")
+            print(f"    Device IDs: {motoboy.device_ids}")
+            print(f"    Tipo dos device_ids: {type(motoboy.device_ids)}")
+            
+            if motoboy.device_ids:
+                print(f"    ✅ TEM DEVICE_IDS, VERIFICANDO...")
+                device_ids_count = len(motoboy.device_ids)
+                print(f"    📊 Total de device_ids: {device_ids_count}")
+                
+                for j, stored_id in enumerate(motoboy.device_ids):
+                    print(f"      🔍 DEVICE_ID {j+1}/{device_ids_count}:")
+                    print(f"        Valor: '{stored_id}'")
+                    print(f"        Tipo: {type(stored_id)}")
+                    print(f"        Tamanho: {len(stored_id) if stored_id else 0}")
+                    print(f"        Comparando com: '{device_id}'")
+                    print(f"        São iguais? {device_id == stored_id}")
+                    print(f"        Comparação detalhada:")
+                    print(f"          device_id == stored_id: {device_id == stored_id}")
+                    print(f"          device_id is stored_id: {device_id is stored_id}")
+                    print(f"          len(device_id) == len(stored_id): {len(device_id) == len(stored_id) if stored_id else False}")
+                    
+                    if device_id == stored_id:
+                        print(f"        🎯 MATCH ENCONTRADO!")
+                        print(f"        ✅ ENCONTROU! Motoboy: {motoboy.full_name}")
+                        print(f"🚀 === FIM CHECK_EXISTING_DEVICE_REGISTRATION (MATCH) ====")
+                        return motoboy
+                    else:
+                        print(f"        ❌ NÃO É IGUAL")
+            else:
+                print(f"    ❌ SEM DEVICE_IDS")
+        
+        print(f"❌ NENHUM MOTOBOY ENCONTRADO COM DEVICE_ID: {device_id}")
+        print(f"📊 RESUMO DA BUSCA:")
+        print(f"  Total de motoboys verificados: {total_motoboys}")
+        print(f"  Device ID procurado: {device_id}")
+        print(f"  Device IDs encontrados no banco:")
+        
+        for motoboy in motoboys:
+            if motoboy.device_ids:
+                for stored_id in motoboy.device_ids:
+                    print(f"    - {stored_id} (de {motoboy.full_name})")
+        
+        print("===============================")
+        print(f"🚀 === FIM CHECK_EXISTING_DEVICE_REGISTRATION (NÃO ENCONTRADO) ====")
+        return None
+        
     except Exception as e:
-        print(f"Erro ao buscar por device_id: {e}")
-    
-    # 2. Verifica se há algum motoboy com device_ids vazio (não foi atualizado ainda)
-    # Isso é um fallback para motoboys antigos
-    try:
-        motoboy = Motoboy.objects.filter(device_ids__isnull=True).first()
-        if motoboy:
-            print(f"Encontrou motoboy existente sem device_ids: {motoboy.full_name}")
-            return motoboy
-    except Exception as e:
-        print(f"Erro ao verificar motoboys existentes: {e}")
-    
-    print(f"Dispositivo {device_id} não encontrou motoboy existente")
-    return None
+        print(f"❌ ERRO AO VERIFICAR DEVICE_ID:")
+        print(f"  Erro: {e}")
+        print(f"  Tipo do erro: {type(e)}")
+        print(f"  Mensagem: {str(e)}")
+        import traceback
+        print(f"  Stack trace: {traceback.format_exc()}")
+        print(f"🚀 === FIM CHECK_EXISTING_DEVICE_REGISTRATION (ERRO) ====")
+        return None
 
 def check_motoboy_status(request):
     """Verifica se o usuário já tem cadastro de motoboy"""

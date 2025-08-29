@@ -33,7 +33,7 @@
                     </div>
                     
                     <!-- Navigation Links -->
-                    <nav class="hidden md:flex items-center space-x-4" id="motoboyNav">
+                    <nav class="flex items-center space-x-4" id="motoboyNav">
                         <!-- Links serão preenchidos dinamicamente -->
                     </nav>
 
@@ -108,42 +108,46 @@
         <section class="py-8">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div id="menuGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {% for item in menu_items %}
-                    <div class="menu-item bg-white rounded-lg shadow-subtle overflow-hidden transition-all duration-200 hover:shadow-elevated" data-category="{{ item.category }}">
+                    {% for product in products %}
+                    <div class="menu-item bg-white rounded-lg shadow-subtle overflow-hidden transition-all duration-200 hover:shadow-elevated" data-category="{{ product.category.name|lower }}">
                         <div class="relative">
-                            <img src="https://images.unsplash.com/photo-1584824486509-112e4181ff6b?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="{{ item.name }}" class="w-full h-48 object-cover" loading="lazy" />
+                            <img src="https://images.unsplash.com/photo-1584824486509-112e4181ff6b?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="{{ product.name }}" class="w-full h-48 object-cover" loading="lazy" />
                             
-                            {% if item.category == 'burgers' %}
+                            {% if product.category.name == 'burgers' %}
                                 <div class="absolute top-2 left-2 bg-primary text-white px-2 py-1 rounded-full text-xs font-semibold">
                                     <i class="fas fa-hamburger mr-1"></i>Hambúrguer
                                 </div>
-                            {% elif item.category == 'pizzas' %}
+                            {% elif product.category.name == 'pizzas' %}
                                 <div class="absolute top-2 left-2 bg-primary text-white px-2 py-1 rounded-full text-xs font-semibold">
                                     <i class="fas fa-pizza-slice mr-1"></i>Pizza
                                 </div>
-                            {% elif item.category == 'drinks' %}
+                            {% elif product.category.name == 'drinks' %}
                                 <div class="absolute top-2 left-2 bg-primary text-white px-2 py-1 rounded-full text-xs font-semibold">
                                     <i class="fas fa-glass-cheers mr-1"></i>Bebida
                                 </div>
-                            {% elif item.category == 'desserts' %}
+                            {% elif product.category.name == 'desserts' %}
                                 <div class="absolute top-2 left-2 bg-primary text-white px-2 py-1 rounded-full text-xs font-semibold">
                                     <i class="fas fa-ice-cream mr-1"></i>Sobremesa
+                                </div>
+                            {% elif product.category.name == 'salads' %}
+                                <div class="absolute top-2 left-2 bg-primary text-white px-2 py-1 rounded-full text-xs font-semibold">
+                                    <i class="fas fa-leaf mr-1"></i>Salada
                                 </div>
                             {% endif %}
                         </div>
                         
                         <div class="p-4">
                             <div class="flex justify-between items-start mb-2">
-                                <h3 class="font-heading font-bold text-secondary text-lg">{{ item.name }}</h3>
-                                <span class="font-bold text-primary text-lg">R$ {{ item.price|floatformat:2 }}</span>
+                                <h3 class="font-heading font-bold text-secondary text-lg">{{ product.name }}</h3>
+                                <span class="font-bold text-primary text-lg">{{ product.formatted_price }}</span>
                             </div>
                             
-                            <p class="text-text-secondary text-sm mb-4 line-clamp-2">{{ item.description }}</p>
+                            <p class="text-text-secondary text-sm mb-4 line-clamp-2">{{ product.description }}</p>
                             
                             <button class="w-full btn-primary text-sm py-2 add-to-cart-btn" 
-                                    data-item-id="{{ item.id }}" 
-                                    data-item-name="{{ item.name }}" 
-                                    data-item-price="{{ item.price }}">
+                                    data-item-id="{{ product.id }}" 
+                                    data-item-name="{{ product.name }}" 
+                                    data-item-price="{{ product.price }}">
                                 <i class="fas fa-plus mr-2"></i>Adicionar ao Carrinho
                             </button>
                         </div>
@@ -151,7 +155,7 @@
                     {% empty %}
                     <div class="col-span-full text-center py-12 text-gray-500">
                         <i class="fas fa-utensils text-4xl mb-4"></i>
-                        <p class="text-lg">Nenhum item disponível no momento</p>
+                        <p class="text-lg">Nenhum produto disponível no momento</p>
                         <p class="text-sm">Volte mais tarde!</p>
                     </div>
                     {% endfor %}
@@ -433,8 +437,9 @@
             // Store cart in localStorage
             localStorage.setItem('orderCart', JSON.stringify(cart));
             
-            // Redirect to checkout
-            window.location.href = '/orders/create/';
+            // Redirect to checkout with cart data
+            const cartData = encodeURIComponent(JSON.stringify(cart));
+            window.location.href = `/orders/create/?cart=${cartData}`;
         }
 
         // Format price
